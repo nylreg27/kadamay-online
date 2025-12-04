@@ -15,25 +15,36 @@
     <style>
         /* --- STYLES (Clean & Mobile Ready) --- */
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
         .login-card { background: white; width: 90%; max-width: 400px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; display: block; }
+        
         .dashboard { display: none; width: 100%; max-width: 600px; height: 100vh; background: #f8f9fa; overflow-y: auto; position: relative; }
-        .header { background: #008080; color: white; padding: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 5px 15px rgba(0,128,128,0.3); position: relative; }
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* HEADER DESIGN */
+        .header { background: #008080; color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 5px 15px rgba(0,128,128,0.3); position: relative; }
+        
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .btn-close { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 14px; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 5px;}
         
         .btn-notif { position: relative; background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
         .badge-dot { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff4757; border-radius: 50%; border: 2px solid #008080; display: none; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        .profile-info h1 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .profile-info p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+        /* PROFILE INFO (CENTERED) */
+        .profile-info { text-align: center; margin-top: 10px; }
+        .profile-info h1 { margin: 5px 0 0 0; font-size: 22px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .profile-info p { margin: 2px 0 0; opacity: 0.9; font-size: 14px; }
+        
         .status-badge { display: inline-block; background: white; color: #008080; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
         .content { padding: 20px; padding-bottom: 80px; }
         .section-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-refresh { background: white; border: 1px solid #ddd; padding: 6px 12px; border-radius: 8px; color: #666; cursor: pointer; font-size: 12px; font-weight: 600; }
         
-        .payment-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        /* PAYMENT CARD DESIGN */
+        .payment-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border-left: 4px solid transparent; }
+        .payment-card:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); border-left: 4px solid #008080; }
+        
         .pay-left { display: flex; flex-direction: column; }
         .pay-date { font-size: 12px; color: #888; }
         .pay-or { font-weight: bold; color: #333; font-size: 14px; }
@@ -48,6 +59,10 @@
         
         .loading-spinner { text-align: center; padding: 40px; color: #888; display: none; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        
+        /* LOGO STYLE */
+        .logo-login { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        .logo-dash { width: 60px; height: 60px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -58,9 +73,12 @@
         <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: #008080; margin-bottom: 20px;"></i>
         <p style="color: #666; font-weight: bold;">Starting KADAMAY...</p>
     </div>
-
+    
     <div id="loginScreen" class="login-card" style="display:none;">
-        <h1 style="color:#008080; font-size: 28px; margin-bottom: 5px;">KADAMAY</h1>
+        
+        <img src="logo.png" alt="Kadamay Logo" class="logo-login">
+        
+        <h1 style="color:#008080; font-size: 28px; margin: 5px 0;">KADAMAY</h1>
         <p style="color:#666; margin-bottom:30px">Online Member Portal</p>
         
         <input type="text" id="serialInput" placeholder="ENTER SERIAL ID">
@@ -82,7 +100,10 @@
                     <span id="notifBadge" class="badge-dot"></span>
                 </button>
             </div>
+            
             <div class="profile-info">
+                <img src="logo.png" alt="Logo" class="logo-dash">
+                
                 <h1 id="dashName">...</h1>
                 <p id="dashSerial">...</p>
                 <span id="dashStatus" class="status-badge">...</span>
@@ -117,17 +138,25 @@
 
         // --- 1. AUTO-LOGIN ON START ---
         window.onload = function() {
-            // Check Local Storage
-            const savedSerial = localStorage.getItem('kadamay_serial');
-            
-            if (savedSerial) {
-                // Auto Login
-                document.getElementById('serialInput').value = savedSerial;
-                verifyMember(true); // true = auto mode
+            // Check for QR Code Link first
+            const urlParams = new URLSearchParams(window.location.search);
+            const serialParam = urlParams.get('serial');
+
+            if (serialParam) {
+                // QR Code Login Mode
+                document.getElementById('serialInput').value = serialParam;
+                verifyMember(true);
             } else {
-                // Show Login Screen
-                document.getElementById('initLoader').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'block';
+                // Check Local Storage Memory
+                const savedSerial = localStorage.getItem('kadamay_serial');
+                if (savedSerial) {
+                    document.getElementById('serialInput').value = savedSerial;
+                    verifyMember(true); 
+                } else {
+                    // Show Login
+                    document.getElementById('initLoader').style.display = 'none';
+                    document.getElementById('loginScreen').style.display = 'block';
+                }
             }
         };
 
@@ -155,20 +184,16 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // SUCCESS LOGIN
+                    // SUCCESS
                     const member = data[0];
-                    
-                    // SAVE TO MEMORY (Local Storage)
                     localStorage.setItem('kadamay_serial', member.memserial);
-                    
                     currentMemberID = member.membersid;
                     loadDashboard(member);
                 } else {
                     // FAIL
-                    localStorage.removeItem('kadamay_serial'); // Clear invalid data
+                    localStorage.removeItem('kadamay_serial');
                     document.getElementById('initLoader').style.display = 'none';
                     document.getElementById('loginScreen').style.display = 'block';
-                    
                     err.innerText = "Serial not found.";
                     err.style.display = 'block';
                     btn.innerText = "LOGIN";
@@ -184,12 +209,10 @@
         }
 
         async function loadDashboard(member) {
-            // Hide Loaders/Login
             document.getElementById('initLoader').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = 'block';
 
-            // UI Updates
             document.getElementById('dashName').innerText = member.surname + ", " + member.name;
             document.getElementById('dashSerial').innerText = "ID: " + member.memserial;
             
@@ -206,20 +229,19 @@
             subscribeToRealtime(member.membersid);
         }
 
-        // --- 3. LOGOUT (CLEAR MEMORY) ---
+        // --- 3. LOGOUT ---
         function logout() {
             if(confirm("Are you sure you want to logout?")) {
-                // Clear Memory
                 localStorage.removeItem('kadamay_serial');
-                
-                // Stop Realtime
                 if (realtimeChannel) _db.removeChannel(realtimeChannel);
                 
-                // Reset UI
                 document.getElementById('dashboardScreen').style.display = 'none';
                 document.getElementById('loginScreen').style.display = 'block';
                 document.getElementById('serialInput').value = "";
                 document.getElementById('btnVerify').innerText = "LOGIN";
+                
+                // Clear URL params if logged out from QR
+                window.history.pushState({}, document.title, window.location.pathname);
             }
         }
 
