@@ -13,24 +13,38 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
+        /* --- STYLES (Clean & Mobile Ready) --- */
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
         .login-card { background: white; width: 90%; max-width: 400px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; display: block; }
+        
         .dashboard { display: none; width: 100%; max-width: 600px; height: 100vh; background: #f8f9fa; overflow-y: auto; position: relative; }
+        
+        /* HEADER DESIGN */
         .header { background: #008080; color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 5px 15px rgba(0,128,128,0.3); position: relative; }
+        
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .btn-close { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 14px; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+        
         .btn-notif { position: relative; background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
         .badge-dot { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff4757; border-radius: 50%; border: 2px solid #008080; display: none; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        /* PROFILE INFO (CENTERED) */
         .profile-info { text-align: center; margin-top: 10px; }
         .profile-info h1 { margin: 5px 0 0 0; font-size: 22px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
         .profile-info p { margin: 2px 0 0; opacity: 0.9; font-size: 14px; }
+        
         .status-badge { display: inline-block; background: white; color: #008080; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
         .content { padding: 20px; padding-bottom: 80px; }
         .section-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .btn-refresh { background: white; border: 1px solid #ddd; padding: 6px 12px; border-radius: 8px; color: #666; cursor: pointer; font-size: 12px; font-weight: 600; }
         
+        /* PAYMENT CARD DESIGN */
         .payment-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border-left: 4px solid transparent; }
         .payment-card:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); border-left: 4px solid #008080; }
+        
         .pay-left { display: flex; flex-direction: column; }
         .pay-date { font-size: 12px; color: #888; }
         .pay-or { font-weight: bold; color: #333; font-size: 14px; }
@@ -39,11 +53,14 @@
         
         input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 18px; text-align: center; text-transform: uppercase; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus { border-color: #008080; box-shadow: 0 0 0 3px rgba(0,128,128,0.1); }
+        
         button.btn-main { width: 100%; padding: 15px; border: none; border-radius: 10px; background: #008080; color: white; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button.btn-main:active { transform: scale(0.98); }
         
         .loading-spinner { text-align: center; padding: 40px; color: #888; display: none; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         
+        /* LOGO STYLE */
         .logo-login { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
         .logo-dash { width: 60px; height: 60px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 5px; }
     </style>
@@ -58,25 +75,35 @@
     </div>
     
     <div id="loginScreen" class="login-card" style="display:none;">
+        
         <img src="logo.png" alt="Kadamay Logo" class="logo-login">
+        
         <h1 style="color:#008080; font-size: 28px; margin: 5px 0;">KADAMAY</h1>
         <p style="color:#666; margin-bottom:30px">Online Member Portal</p>
+        
         <input type="text" id="serialInput" placeholder="ENTER SERIAL ID">
         <button class="btn-main" id="btnVerify" onclick="verifyMember(false)">LOGIN</button>
         <p id="loginError" style="color:red; font-size:13px; margin-top:15px; display:none;"></p>
+        
         <p style="font-size: 11px; color: #999; margin-top: 30px;">Enter your ID once to stay logged in.</p>
     </div>
 
     <div id="dashboardScreen" class="dashboard">
         <div class="header">
             <div class="top-nav">
-                <button class="btn-close" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button class="btn-close" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+                
                 <button class="btn-notif" onclick="clearNotif()">
-                    <i class="fas fa-bell"></i><span id="notifBadge" class="badge-dot"></span>
+                    <i class="fas fa-bell"></i>
+                    <span id="notifBadge" class="badge-dot"></span>
                 </button>
             </div>
+            
             <div class="profile-info">
                 <img src="logo.png" alt="Logo" class="logo-dash">
+                
                 <h1 id="dashName">...</h1>
                 <p id="dashSerial">...</p>
                 <span id="dashStatus" class="status-badge">...</span>
@@ -86,19 +113,22 @@
         <div class="content">
             <div class="section-title">
                 <span><i class="fas fa-history" style="color:#008080; margin-right: 5px;"></i> Payment History</span>
-                <button class="btn-refresh" onclick="refreshData()"> <i class="fas fa-sync-alt"></i> Refresh </button>
+                <button class="btn-refresh" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
             </div>
             <p id="payCount" style="font-size:12px; color:#888; margin-top:-10px; margin-bottom:15px">Synced just now</p>
+
             <div id="loading" class="loading-spinner"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading Payments...</div>
             <div id="paymentList"></div>
         </div>
     </div>
 
     <script>
-        // --- KEYS ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://ougkeltvpikpimyqexjc.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_el2jm7Ejz4qDJ4igRZ0mJw_jNEpXJdl'; 
-        // ------------
+        // ---------------------
 
         const { createClient } = supabase;
         const _db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -106,33 +136,41 @@
         let currentMemberID = 0;
         let realtimeChannel = null;
 
-        // 1. AUTO-LOGIN
+        // --- 1. AUTO-LOGIN ON START ---
         window.onload = function() {
+            // Check for QR Code Link first
             const urlParams = new URLSearchParams(window.location.search);
             const serialParam = urlParams.get('serial');
 
             if (serialParam) {
+                // QR Code Login Mode
                 document.getElementById('serialInput').value = serialParam;
                 verifyMember(true);
             } else {
+                // Check Local Storage Memory
                 const savedSerial = localStorage.getItem('kadamay_serial');
                 if (savedSerial) {
                     document.getElementById('serialInput').value = savedSerial;
                     verifyMember(true); 
                 } else {
+                    // Show Login
                     document.getElementById('initLoader').style.display = 'none';
                     document.getElementById('loginScreen').style.display = 'block';
                 }
             }
         };
 
-        // 2. VERIFY
+        // --- 2. VERIFY / LOGIN ---
         async function verifyMember(isAuto) {
             const input = document.getElementById('serialInput').value.trim();
             const btn = document.getElementById('btnVerify');
             const err = document.getElementById('loginError');
 
-            if (!input) { if(!isAuto) alert("Please enter Serial!"); return; }
+            if (!input) { 
+                if(!isAuto) alert("Please enter Serial!"); 
+                return; 
+            }
+
             if(!isAuto) btn.innerText = "VERIFYING...";
             err.style.display = 'none';
 
@@ -146,11 +184,13 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
+                    // SUCCESS
                     const member = data[0];
                     localStorage.setItem('kadamay_serial', member.memserial);
                     currentMemberID = member.membersid;
                     loadDashboard(member);
                 } else {
+                    // FAIL
                     localStorage.removeItem('kadamay_serial');
                     document.getElementById('initLoader').style.display = 'none';
                     document.getElementById('loginScreen').style.display = 'block';
@@ -189,14 +229,18 @@
             subscribeToRealtime(member.membersid);
         }
 
+        // --- 3. LOGOUT ---
         function logout() {
             if(confirm("Are you sure you want to logout?")) {
                 localStorage.removeItem('kadamay_serial');
                 if (realtimeChannel) _db.removeChannel(realtimeChannel);
+                
                 document.getElementById('dashboardScreen').style.display = 'none';
                 document.getElementById('loginScreen').style.display = 'block';
                 document.getElementById('serialInput').value = "";
                 document.getElementById('btnVerify').innerText = "LOGIN";
+                
+                // Clear URL params if logged out from QR
                 window.history.pushState({}, document.title, window.location.pathname);
             }
         }
@@ -205,7 +249,7 @@
             if(currentMemberID > 0) fetchPayments(currentMemberID);
         }
 
-        // --- FETCH WITH COMBINED REMARKS ---
+        // --- FETCH WITH COMBINED REMARKS (Logic Updated) ---
         async function fetchPayments(id) {
             const list = document.getElementById('paymentList');
             const loader = document.getElementById('loading');
@@ -215,8 +259,7 @@
             loader.style.display = 'block';
 
             try {
-                // FIXED QUERY: Now fetching 'payment_remarks' AND 'mortuary'
-                // NOTE: If 'mortuary' column name is different in DB, this will alert an error.
+                // FIXED: Gidugang ang 'mortuary' sa select
                 let { data, error } = await _db
                     .from('qrycontribution') 
                     .select('dtepaid, receiptno, amount, payment_remarks, mortuary') 
@@ -234,7 +277,7 @@
                         const dateStr = d.toLocaleDateString();
                         
                         // --- COMBINE LOGIC ---
-                        // Combine payment_remarks AND mortuary (separated by space)
+                        // Combine payment_remarks AND mortuary (separated by dash)
                         let fullRemarks = (pay.payment_remarks || '').trim();
                         let mortuaryInfo = (pay.mortuary || '').trim();
                         
@@ -263,8 +306,9 @@
                 }
 
             } catch (e) {
-                // Detailed error for easier debugging
-                alert("PAYMENT ERROR: " + e.message + "\n\nHint: Check if column 'mortuary' exists in qrycontribution.");
+                // Warning if column is missing
+                console.error(e);
+                alert("ERROR: " + e.message + "\n\nHint: Check if column 'mortuary' is in your database View.");
                 loader.style.display = 'none';
             }
         }
