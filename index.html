@@ -30,7 +30,7 @@
         .badge-dot { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff4757; border-radius: 50%; border: 2px solid #008080; display: none; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        /* PROFILE INFO (CENTERED) */
+        /* PROFILE INFO */
         .profile-info { text-align: center; margin-top: 10px; }
         .profile-info h1 { margin: 5px 0 0 0; font-size: 22px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
         .profile-info p { margin: 2px 0 0; opacity: 0.9; font-size: 14px; }
@@ -138,22 +138,18 @@
 
         // --- 1. AUTO-LOGIN ON START ---
         window.onload = function() {
-            // Check for QR Code Link first
             const urlParams = new URLSearchParams(window.location.search);
             const serialParam = urlParams.get('serial');
 
             if (serialParam) {
-                // QR Code Login Mode
                 document.getElementById('serialInput').value = serialParam;
                 verifyMember(true);
             } else {
-                // Check Local Storage Memory
                 const savedSerial = localStorage.getItem('kadamay_serial');
                 if (savedSerial) {
                     document.getElementById('serialInput').value = savedSerial;
                     verifyMember(true); 
                 } else {
-                    // Show Login
                     document.getElementById('initLoader').style.display = 'none';
                     document.getElementById('loginScreen').style.display = 'block';
                 }
@@ -184,13 +180,11 @@
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // SUCCESS
                     const member = data[0];
                     localStorage.setItem('kadamay_serial', member.memserial);
                     currentMemberID = member.membersid;
                     loadDashboard(member);
                 } else {
-                    // FAIL
                     localStorage.removeItem('kadamay_serial');
                     document.getElementById('initLoader').style.display = 'none';
                     document.getElementById('loginScreen').style.display = 'block';
@@ -240,7 +234,6 @@
                 document.getElementById('serialInput').value = "";
                 document.getElementById('btnVerify').innerText = "LOGIN";
                 
-                // Clear URL params if logged out from QR
                 window.history.pushState({}, document.title, window.location.pathname);
             }
         }
@@ -249,7 +242,7 @@
             if(currentMemberID > 0) fetchPayments(currentMemberID);
         }
 
-        // --- FETCH WITH COMBINED REMARKS (Logic Updated) ---
+        // --- FETCH WITH DECEASED NAME (UPDATED) ---
         async function fetchPayments(id) {
             const list = document.getElementById('paymentList');
             const loader = document.getElementById('loading');
@@ -259,10 +252,10 @@
             loader.style.display = 'block';
 
             try {
-                // FIXED: Gidugang ang 'mortuary' sa select
+                // FIXED: Changed 'mortuary' to 'deceasedname'
                 let { data, error } = await _db
                     .from('qrycontribution') 
-                    .select('dtepaid, receiptno, amount, payment_remarks, mortuary') 
+                    .select('dtepaid, receiptno, amount, payment_remarks, deceasedname') 
                     .eq('membersid', id)
                     .order('dtepaid', { ascending: false });
 
@@ -277,13 +270,13 @@
                         const dateStr = d.toLocaleDateString();
                         
                         // --- COMBINE LOGIC ---
-                        // Combine payment_remarks AND mortuary (separated by dash)
+                        // Combine payment_remarks AND deceasedname (separated by dash)
                         let fullRemarks = (pay.payment_remarks || '').trim();
-                        let mortuaryInfo = (pay.mortuary || '').trim();
+                        let deadName = (pay.deceasedname || '').trim();
                         
-                        if (mortuaryInfo) {
+                        if (deadName) {
                             if (fullRemarks) fullRemarks += " - "; // Add separator if both exist
-                            fullRemarks += mortuaryInfo;
+                            fullRemarks += deadName;
                         }
                         // ---------------------
 
@@ -306,9 +299,8 @@
                 }
 
             } catch (e) {
-                // Warning if column is missing
                 console.error(e);
-                alert("ERROR: " + e.message + "\n\nHint: Check if column 'mortuary' is in your database View.");
+                alert("ERROR: " + e.message + "\n\nHint: Check if column 'deceasedname' is in your database View.");
                 loader.style.display = 'none';
             }
         }
