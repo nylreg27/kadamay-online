@@ -11,58 +11,472 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- STYLES (Clean & Mobile Ready) --- */
-        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        /* --- MODERN STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        .login-card { background: white; width: 90%; max-width: 400px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; display: block; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
         
-        .dashboard { display: none; width: 100%; max-width: 600px; height: 100vh; background: #f8f9fa; overflow-y: auto; position: relative; }
+        /* LOGIN CARD - Enhanced */
+        .login-card { 
+            background: white; 
+            width: 90%; 
+            max-width: 420px; 
+            padding: 40px 30px; 
+            border-radius: 25px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+            text-align: center; 
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
         
-        /* HEADER DESIGN */
-        .header { background: #008080; color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 5px 15px rgba(0,128,128,0.3); position: relative; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn-close { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 14px; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+        /* DASHBOARD - Glass Morphism */
+        .dashboard { 
+            display: none; 
+            width: 100%; 
+            max-width: 600px; 
+            height: 100vh; 
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            overflow-y: auto; 
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
         
-        .btn-notif { position: relative; background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
-        .badge-dot { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff4757; border-radius: 50%; border: 2px solid #008080; display: none; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        /* HEADER - Gradient with Wave */
+        .header { 
+            background: linear-gradient(135deg, #008080 0%, #00a896 100%);
+            color: white; 
+            padding: 25px 20px 35px; 
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,128,128,0.3);
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 50% 50% 0 0 / 20px 20px 0 0;
+        }
+        
+        .top-nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .btn-close { 
+            background: rgba(255,255,255,0.2); 
+            border: none; 
+            color: white; 
+            font-size: 13px; 
+            padding: 10px 18px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-notif { 
+            position: relative; 
+            background: rgba(255,255,255,0.2); 
+            border: none; 
+            color: white; 
+            font-size: 20px; 
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-notif:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        .badge-dot { 
+            position: absolute; 
+            top: 8px; 
+            right: 8px; 
+            width: 14px; 
+            height: 14px; 
+            background: #ff4757; 
+            border-radius: 50%; 
+            border: 3px solid #008080; 
+            display: none; 
+            animation: pulse 1.5s infinite; 
+            box-shadow: 0 0 10px rgba(255,71,87,0.8);
+        }
+        
+        @keyframes pulse { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.3); } 
+        }
 
-        /* PROFILE INFO */
-        .profile-info { text-align: center; margin-top: 10px; }
-        .profile-info h1 { margin: 5px 0 0 0; font-size: 22px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .profile-info p { margin: 2px 0 0; opacity: 0.9; font-size: 14px; }
+        /* PROFILE - Enhanced */
+        .profile-info { 
+            text-align: center; 
+            margin-top: 15px;
+            position: relative;
+            z-index: 10;
+        }
         
-        .status-badge { display: inline-block; background: white; color: #008080; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .logo-dash { 
+            width: 80px; 
+            height: 80px; 
+            object-fit: contain; 
+            background: white; 
+            border-radius: 50%; 
+            padding: 8px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin-bottom: 12px;
+            border: 4px solid rgba(255,255,255,0.5);
+        }
         
-        .content { padding: 20px; padding-bottom: 80px; }
-        .section-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-refresh { background: white; border: 1px solid #ddd; padding: 6px 12px; border-radius: 8px; color: #666; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .profile-info h1 { 
+            margin: 8px 0 0 0; 
+            font-size: 24px; 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         
-        /* PAYMENT CARD DESIGN */
-        .payment-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border-left: 4px solid transparent; }
-        .payment-card:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); border-left: 4px solid #008080; }
+        .profile-info p { 
+            margin: 5px 0 0; 
+            opacity: 0.95; 
+            font-size: 14px;
+            font-weight: 500;
+        }
         
-        .pay-left { display: flex; flex-direction: column; }
-        .pay-date { font-size: 12px; color: #888; }
-        .pay-or { font-weight: bold; color: #333; font-size: 14px; }
-        .pay-right { font-weight: bold; color: #008080; font-size: 16px; }
-        .pay-remarks { font-size: 11px; color: #666; font-style: italic; margin-top: 3px; }
+        .status-badge { 
+            display: inline-block; 
+            background: white; 
+            color: #008080; 
+            padding: 8px 20px; 
+            border-radius: 25px; 
+            font-weight: 700; 
+            font-size: 12px; 
+            margin-top: 12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            letter-spacing: 0.5px;
+        }
         
-        input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 18px; text-align: center; text-transform: uppercase; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: #008080; box-shadow: 0 0 0 3px rgba(0,128,128,0.1); }
+        /* CONTENT AREA */
+        .content { 
+            padding: 30px 20px; 
+            padding-bottom: 40px;
+        }
         
-        button.btn-main { width: 100%; padding: 15px; border: none; border-radius: 10px; background: #008080; color: white; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button.btn-main:active { transform: scale(0.98); }
+        .section-title { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: #2c3e50; 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
         
-        .loading-spinner { text-align: center; padding: 40px; color: #888; display: none; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .btn-refresh { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            color: white;
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+        }
         
-        /* LOGO STYLE */
-        .logo-login { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-        .logo-dash { width: 60px; height: 60px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 5px; }
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102,126,234,0.4);
+        }
+        
+        .btn-refresh:active {
+            transform: translateY(0);
+        }
+        
+        /* PAYMENT CARDS - Modern Design */
+        .payment-card { 
+            background: white;
+            padding: 18px; 
+            border-radius: 15px; 
+            margin-bottom: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.3s;
+            border-left: 5px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .payment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+        
+        .payment-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .payment-card:hover::before {
+            width: 100%;
+            opacity: 0.05;
+        }
+        
+        .pay-left { 
+            display: flex; 
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .pay-date { 
+            font-size: 12px; 
+            color: #95a5a6;
+            font-weight: 500;
+        }
+        
+        .pay-or { 
+            font-weight: 700; 
+            color: #2c3e50; 
+            font-size: 15px;
+        }
+        
+        .pay-right { 
+            font-weight: 700; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 18px;
+        }
+        
+        .pay-remarks { 
+            font-size: 11px; 
+            color: #7f8c8d;
+            font-weight: 500;
+            font-style: italic; 
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .pay-remarks::before {
+            content: '📝';
+            font-size: 10px;
+        }
+        
+        /* INPUT STYLING */
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            margin-bottom: 20px; 
+            border: 2px solid #e0e0e0;
+            border-radius: 12px; 
+            font-size: 18px; 
+            text-align: center; 
+            text-transform: uppercase; 
+            box-sizing: border-box; 
+            outline: none; 
+            transition: all 0.3s;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        input:focus { 
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* BUTTON STYLING */
+        button.btn-main { 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 12px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            font-size: 16px; 
+            cursor: pointer; 
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button.btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102,126,234,0.4);
+        }
+        
+        button.btn-main:active { 
+            transform: translateY(0);
+        }
+        
+        /* LOADING */
+        .loading-spinner { 
+            text-align: center; 
+            padding: 60px 20px; 
+            color: #95a5a6;
+            display: none;
+        }
+        
+        .loading-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 999; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column;
+        }
+        
+        .loading-overlay i {
+            color: white;
+            font-size: 50px;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-overlay p {
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+        
+        /* LOGO */
+        .logo-login { 
+            width: 120px; 
+            height: 120px; 
+            object-fit: contain; 
+            margin-bottom: 15px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+        }
+        
+        /* STATS SUMMARY */
+        .stats-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.9;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+        
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+        
+        /* Smooth Scrollbar */
+        .dashboard::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .dashboard::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .dashboard::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -70,22 +484,24 @@
     <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="initLoader" class="loading-overlay">
-        <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: #008080; margin-bottom: 20px;"></i>
-        <p style="color: #666; font-weight: bold;">Starting KADAMAY...</p>
+        <i class="fas fa-circle-notch"></i>
+        <p>STARTING KADAMAY...</p>
     </div>
     
     <div id="loginScreen" class="login-card" style="display:none;">
         
         <img src="logo.png" alt="Kadamay Logo" class="logo-login">
         
-        <h1 style="color:#008080; font-size: 28px; margin: 5px 0;">KADAMAY</h1>
-        <p style="color:#666; margin-bottom:30px">Online Member Portal</p>
+        <h1 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 10px 0; letter-spacing: 2px;">KADAMAY</h1>
+        <p style="color:#95a5a6; margin-bottom:35px; font-weight: 600;">Online Member Portal</p>
         
         <input type="text" id="serialInput" placeholder="ENTER SERIAL ID">
-        <button class="btn-main" id="btnVerify" onclick="verifyMember(false)">LOGIN</button>
-        <p id="loginError" style="color:red; font-size:13px; margin-top:15px; display:none;"></p>
+        <button class="btn-main" id="btnVerify" onclick="verifyMember(false)">
+            <i class="fas fa-sign-in-alt"></i> LOGIN
+        </button>
+        <p id="loginError" style="color:#e74c3c; font-size:13px; margin-top:20px; display:none; font-weight: 600;"></p>
         
-        <p style="font-size: 11px; color: #999; margin-top: 30px;">Enter your ID once to stay logged in.</p>
+        <p style="font-size: 11px; color: #bdc3c7; margin-top: 35px; font-weight: 500;">Enter your ID once to stay logged in.</p>
     </div>
 
     <div id="dashboardScreen" class="dashboard">
@@ -111,15 +527,36 @@
         </div>
 
         <div class="content">
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Payments</div>
+                        <div class="stat-value" id="statCount">0</div>
+                    </div>
+                    <div class="stat-item" style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(255,255,255,0.3);">
+                        <div class="stat-label">Total Amount</div>
+                        <div class="stat-value" id="statAmount">₱0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Last Payment</div>
+                        <div class="stat-value" id="statLast" style="font-size: 14px; margin-top: 8px;">—</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="section-title">
-                <span><i class="fas fa-history" style="color:#008080; margin-right: 5px;"></i> Payment History</span>
+                <span><i class="fas fa-history" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 8px;"></i> Payment History</span>
                 <button class="btn-refresh" onclick="refreshData()">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
-            <p id="payCount" style="font-size:12px; color:#888; margin-top:-10px; margin-bottom:15px">Synced just now</p>
+            <p id="payCount" style="font-size:12px; color:#95a5a6; margin-top:-15px; margin-bottom:20px; font-weight: 600;">Synced just now</p>
 
-            <div id="loading" class="loading-spinner"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading Payments...</div>
+            <div id="loading" class="loading-spinner">
+                <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #667eea;"></i>
+                <p style="margin-top: 20px; font-weight: 600;">Loading Payments...</p>
+            </div>
             <div id="paymentList"></div>
         </div>
     </div>
@@ -163,11 +600,14 @@
             const err = document.getElementById('loginError');
 
             if (!input) { 
-                if(!isAuto) alert("Please enter Serial!"); 
+                if(!isAuto) {
+                    err.innerText = "⚠️ Please enter your Serial ID";
+                    err.style.display = 'block';
+                }
                 return; 
             }
 
-            if(!isAuto) btn.innerText = "VERIFYING...";
+            if(!isAuto) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFYING...';
             err.style.display = 'none';
 
             try {
@@ -188,17 +628,17 @@
                     localStorage.removeItem('kadamay_serial');
                     document.getElementById('initLoader').style.display = 'none';
                     document.getElementById('loginScreen').style.display = 'block';
-                    err.innerText = "Serial not found.";
+                    err.innerText = "❌ Serial ID not found. Please try again.";
                     err.style.display = 'block';
-                    btn.innerText = "LOGIN";
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
                 }
             } catch (e) {
                 console.error(e);
                 document.getElementById('initLoader').style.display = 'none';
                 document.getElementById('loginScreen').style.display = 'block';
-                err.innerText = "Connection Error.";
+                err.innerText = "⚠️ Connection Error. Please check your internet.";
                 err.style.display = 'block';
-                btn.innerText = "LOGIN";
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
             }
         }
 
@@ -212,11 +652,13 @@
             
             const statusEl = document.getElementById('dashStatus');
             if (member.isactive) {
-                statusEl.innerText = "ACTIVE MEMBER";
+                statusEl.innerText = "✓ ACTIVE MEMBER";
+                statusEl.style.background = "white";
                 statusEl.style.color = "#008080";
             } else {
-                statusEl.innerText = "INACTIVE";
-                statusEl.style.color = "red";
+                statusEl.innerText = "⚠ INACTIVE";
+                statusEl.style.background = "white";
+                statusEl.style.color = "#e74c3c";
             }
 
             fetchPayments(member.membersid);
@@ -232,7 +674,7 @@
                 document.getElementById('dashboardScreen').style.display = 'none';
                 document.getElementById('loginScreen').style.display = 'block';
                 document.getElementById('serialInput').value = "";
-                document.getElementById('btnVerify').innerText = "LOGIN";
+                document.getElementById('btnVerify').innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
                 
                 window.history.pushState({}, document.title, window.location.pathname);
             }
@@ -242,7 +684,7 @@
             if(currentMemberID > 0) fetchPayments(currentMemberID);
         }
 
-        // --- FETCH WITH DECEASED NAME (UPDATED) ---
+        // --- FETCH WITH STATS ---
         async function fetchPayments(id) {
             const list = document.getElementById('paymentList');
             const loader = document.getElementById('loading');
@@ -252,7 +694,6 @@
             loader.style.display = 'block';
 
             try {
-                // FIXED: Changed 'mortuary' to 'deceasedname'
                 let { data, error } = await _db
                     .from('qrycontribution') 
                     .select('dtepaid, receiptno, amount, payment_remarks, deceasedname') 
@@ -262,23 +703,28 @@
                 if (error) throw error;
 
                 loader.style.display = 'none';
-                count.innerText = (data ? data.length : 0) + " Records Found";
+                count.innerText = (data ? data.length : 0) + " Records • Last synced " + new Date().toLocaleTimeString();
 
+                // Update stats
                 if (data && data.length > 0) {
+                    const totalAmount = data.reduce((sum, p) => sum + (p.amount || 0), 0);
+                    const lastDate = new Date(data[0].dtepaid).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    document.getElementById('statCount').innerText = data.length;
+                    document.getElementById('statAmount').innerText = '₱' + totalAmount.toLocaleString();
+                    document.getElementById('statLast').innerText = lastDate;
+
                     data.forEach(pay => {
                         const d = new Date(pay.dtepaid);
-                        const dateStr = d.toLocaleDateString();
+                        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                         
-                        // --- COMBINE LOGIC ---
-                        // Combine payment_remarks AND deceasedname (separated by dash)
                         let fullRemarks = (pay.payment_remarks || '').trim();
                         let deadName = (pay.deceasedname || '').trim();
                         
                         if (deadName) {
-                            if (fullRemarks) fullRemarks += " - "; // Add separator if both exist
+                            if (fullRemarks) fullRemarks += " - ";
                             fullRemarks += deadName;
                         }
-                        // ---------------------
 
                         const item = document.createElement('div');
                         item.className = 'payment-card';
@@ -286,7 +732,7 @@
                             <div class="pay-left">
                                 <span class="pay-or">OR# ${pay.receiptno || 'N/A'}</span>
                                 <span class="pay-date">${dateStr}</span>
-                                <span class="pay-remarks">${fullRemarks}</span>
+                                ${fullRemarks ? `<span class="pay-remarks">${fullRemarks}</span>` : ''}
                             </div>
                             <div class="pay-right">
                                 ₱${(pay.amount || 0).toLocaleString()}
@@ -295,7 +741,17 @@
                         list.appendChild(item);
                     });
                 } else {
-                    list.innerHTML = '<p style="text-align:center; color:#999; margin-top:30px; font-size:13px">No payment history found.</p>';
+                    document.getElementById('statCount').innerText = '0';
+                    document.getElementById('statAmount').innerText = '₱0';
+                    document.getElementById('statLast').innerText = '—';
+                    
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p style="font-weight: 600; margin-top: 10px;">No payment history found</p>
+                            <p style="font-size: 12px; color: #bdc3c7; margin-top: 5px;">Your transactions will appear here</p>
+                        </div>
+                    `;
                 }
 
             } catch (e) {
@@ -328,7 +784,6 @@
 
         function clearNotif() {
             document.getElementById('notifBadge').style.display = 'none';
-            alert("System is up to date.");
         }
     </script>
 </body>
