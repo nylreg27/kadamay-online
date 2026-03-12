@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KADAMAY Portal</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#008080">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,21 +13,42 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- MODERN STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body { 
             font-family: 'Poppins', sans-serif; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
             min-height: 100vh; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        /* LOGIN CARD - Enhanced */
+        /* Cute Animations */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
         .login-card { 
             background: white; 
             width: 90%; 
@@ -36,288 +56,168 @@
             padding: 40px 30px; 
             border-radius: 25px; 
             box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
-            text-align: center; 
-            display: block;
+            text-align: center;
             animation: slideIn 0.5s ease-out;
         }
         
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* DASHBOARD - Glass Morphism */
         .dashboard { 
             display: none; 
             width: 100%; 
             max-width: 600px; 
             height: 100vh; 
             background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            overflow-y: auto; 
-            position: relative;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-out;
         }
         
-        /* HEADER - Gradient with Wave */
         .header { 
             background: linear-gradient(135deg, #008080 0%, #00a896 100%);
             color: white; 
             padding: 25px 20px 35px; 
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,128,128,0.3);
+            animation: slideIn 0.4s ease-out;
         }
         
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 40px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 50% 50% 0 0 / 20px 20px 0 0;
-        }
-        
-        .top-nav { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .btn-close { 
-            background: rgba(255,255,255,0.2); 
-            border: none; 
-            color: white; 
-            font-size: 13px; 
-            padding: 10px 18px; 
-            border-radius: 25px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px;
-            font-weight: 600;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        
-        .btn-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
-        
-        .btn-notif { 
-            position: relative; 
-            background: rgba(255,255,255,0.2); 
-            border: none; 
-            color: white; 
-            font-size: 20px; 
-            cursor: pointer;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        
-        .btn-notif:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-        
-        .badge-dot { 
-            position: absolute; 
-            top: 8px; 
-            right: 8px; 
-            width: 14px; 
-            height: 14px; 
-            background: #ff4757; 
-            border-radius: 50%; 
-            border: 3px solid #008080; 
-            display: none; 
-            animation: pulse 1.5s infinite; 
-            box-shadow: 0 0 10px rgba(255,71,87,0.8);
-        }
-        
-        @keyframes pulse { 
-            0%, 100% { transform: scale(1); } 
-            50% { transform: scale(1.3); } 
-        }
-
-        /* PROFILE - Enhanced */
         .profile-info { 
             text-align: center; 
-            margin-top: 15px;
-            position: relative;
+            margin-top: 15px; 
+            position: relative; 
             z-index: 10;
+            animation: fadeIn 0.5s ease-out 0.2s both;
         }
         
         .logo-dash { 
             width: 80px; 
             height: 80px; 
-            object-fit: contain; 
             background: white; 
             border-radius: 50%; 
             padding: 8px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             margin-bottom: 12px;
-            border: 4px solid rgba(255,255,255,0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+        }
+        
+        .logo-dash:hover {
+            transform: rotate(360deg) scale(1.1);
         }
         
         .profile-info h1 { 
-            margin: 8px 0 0 0; 
-            font-size: 24px; 
-            text-transform: uppercase; 
+            font-size: 22px; 
             font-weight: 700; 
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-transform: uppercase;
         }
         
-        .profile-info p { 
-            margin: 5px 0 0; 
-            opacity: 0.95; 
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .status-badge { 
-            display: inline-block; 
-            background: white; 
-            color: #008080; 
-            padding: 8px 20px; 
-            border-radius: 25px; 
-            font-weight: 700; 
-            font-size: 12px; 
-            margin-top: 12px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            letter-spacing: 0.5px;
-        }
-        
-        /* CONTENT AREA */
         .content { 
-            padding: 30px 20px; 
-            padding-bottom: 40px;
+            padding: 30px 20px;
+            animation: slideInLeft 0.5s ease-out 0.3s both;
         }
         
-        .section-title { 
-            font-size: 18px; 
-            font-weight: 700; 
-            color: #2c3e50; 
-            margin-bottom: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-        }
-        
-        .btn-refresh { 
+        .stats-summary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 8px 16px; 
-            border-radius: 20px; 
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
             color: white;
-            cursor: pointer; 
-            font-size: 12px; 
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+            animation: slideIn 0.5s ease-out 0.4s both;
         }
         
-        .btn-refresh:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(102,126,234,0.4);
+        .stats-row { display: flex; justify-content: space-around; }
+        .stat-item { 
+            text-align: center;
+            transition: transform 0.3s;
         }
         
-        .btn-refresh:active {
-            transform: translateY(0);
+        .stat-item:hover {
+            transform: translateY(-5px);
         }
         
-        /* PAYMENT CARDS - Modern Design */
+        .stat-label { 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            opacity: 0.9; 
+        }
+        
+        .stat-value { 
+            font-size: 24px; 
+            font-weight: 700; 
+            margin-top: 5px;
+            animation: pulse 2s infinite;
+        }
+        
         .payment-card { 
             background: white;
             padding: 18px; 
             border-radius: 15px; 
             margin-bottom: 12px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.4s ease-out backwards;
+        }
+        
+        /* Stagger animation for cards */
+        .payment-card:nth-child(1) { animation-delay: 0.5s; }
+        .payment-card:nth-child(2) { animation-delay: 0.6s; }
+        .payment-card:nth-child(3) { animation-delay: 0.7s; }
+        .payment-card:nth-child(4) { animation-delay: 0.8s; }
+        .payment-card:nth-child(n+5) { animation-delay: 0.9s; }
+        
+        .payment-card.paid { border-left: 5px solid #10b981; }
+        .payment-card.unpaid { border-left: 5px solid #ef4444; }
+        
+        .payment-card:hover { 
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .pay-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .pay-name { font-weight: 700; font-size: 15px; color: #2c3e50; }
+        .pay-date { font-size: 12px; color: #95a5a6; margin-top: 4px; }
+        
+        .pay-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
             transition: all 0.3s;
-            border-left: 5px solid transparent;
-            position: relative;
-            overflow: hidden;
         }
         
-        .payment-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s;
+        .pay-badge:hover {
+            transform: scale(1.1);
         }
         
-        .payment-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        .pay-badge.paid { 
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 10px rgba(16,185,129,0.3);
         }
         
-        .payment-card:hover::before {
-            width: 100%;
-            opacity: 0.05;
+        .pay-badge.unpaid { 
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 10px rgba(239,68,68,0.3);
         }
         
-        .pay-left { 
-            display: flex; 
-            flex-direction: column;
-            gap: 4px;
+        .pay-details { 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-top: 10px;
+            transition: all 0.3s;
         }
         
-        .pay-date { 
-            font-size: 12px; 
-            color: #95a5a6;
-            font-weight: 500;
+        .pay-details:hover {
+            transform: scale(1.02);
         }
         
-        .pay-or { 
-            font-weight: 700; 
-            color: #2c3e50; 
-            font-size: 15px;
+        .pay-details.paid { 
+            background: rgba(16,185,129,0.1); 
+            border: 1px solid rgba(16,185,129,0.3); 
         }
         
-        .pay-right { 
-            font-weight: 700; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 18px;
+        .pay-details.unpaid { 
+            background: rgba(239,68,68,0.1); 
+            border: 1px solid rgba(239,68,68,0.3); 
         }
         
-        .pay-remarks { 
-            font-size: 11px; 
-            color: #7f8c8d;
-            font-weight: 500;
-            font-style: italic; 
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .pay-remarks::before {
-            content: '📝';
-            font-size: 10px;
-        }
-        
-        /* INPUT STYLING */
         input { 
             width: 100%; 
             padding: 16px; 
@@ -326,145 +226,56 @@
             border-radius: 12px; 
             font-size: 18px; 
             text-align: center; 
-            text-transform: uppercase; 
-            box-sizing: border-box; 
-            outline: none; 
+            text-transform: uppercase;
             transition: all 0.3s;
-            font-weight: 600;
-            letter-spacing: 2px;
         }
         
-        input:focus { 
+        input:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
             transform: translateY(-2px);
         }
         
-        /* BUTTON STYLING */
-        button.btn-main { 
+        .btn-main { 
             width: 100%; 
             padding: 16px; 
             border: none; 
             border-radius: 12px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white; 
             font-size: 16px; 
-            cursor: pointer; 
             font-weight: 700;
+            cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 8px 20px rgba(102,126,234,0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
         
-        button.btn-main:hover {
-            transform: translateY(-2px);
+        .btn-main:hover {
+            transform: translateY(-3px);
             box-shadow: 0 12px 30px rgba(102,126,234,0.4);
         }
         
-        button.btn-main:active { 
+        .btn-main:active {
             transform: translateY(0);
-        }
-        
-        /* LOADING */
-        .loading-spinner { 
-            text-align: center; 
-            padding: 60px 20px; 
-            color: #95a5a6;
-            display: none;
         }
         
         .loading-overlay { 
             position: fixed; 
             top: 0; 
-            left: 0; 
             width: 100%; 
             height: 100%; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            z-index: 999; 
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex; 
             justify-content: center; 
-            align-items: center; 
+            align-items: center;
             flex-direction: column;
         }
         
         .loading-overlay i {
-            color: white;
-            font-size: 50px;
-            margin-bottom: 20px;
             animation: spin 1s linear infinite;
         }
         
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-overlay p {
-            color: white;
-            font-weight: 700;
-            font-size: 18px;
-            letter-spacing: 1px;
-        }
-        
-        /* LOGO */
-        .logo-login { 
-            width: 120px; 
-            height: 120px; 
-            object-fit: contain; 
-            margin-bottom: 15px;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
-        }
-        
-        /* STATS SUMMARY */
-        .stats-summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            color: white;
-            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
-        }
-        
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .stat-item {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .stat-label {
-            font-size: 11px;
-            opacity: 0.9;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-top: 5px;
-        }
-        
-        /* EMPTY STATE */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #95a5a6;
-        }
-        
-        .empty-state i {
-            font-size: 60px;
-            margin-bottom: 15px;
-            opacity: 0.3;
-        }
-        
-        /* Smooth Scrollbar */
+        /* Smooth scrollbar */
         .dashboard::-webkit-scrollbar {
             width: 6px;
         }
@@ -474,171 +285,102 @@
         }
         
         .dashboard::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
     <div id="initLoader" class="loading-overlay">
-        <i class="fas fa-circle-notch"></i>
-        <p>STARTING KADAMAY...</p>
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: white;"></i>
+        <p style="color: white; margin-top: 20px; font-weight: 700;">LOADING...</p>
     </div>
     
     <div id="loginScreen" class="login-card" style="display:none;">
-        
-        <img src="logo.png" alt="Kadamay Logo" class="logo-login">
-        
-        <h1 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 10px 0; letter-spacing: 2px;">KADAMAY</h1>
-        <p style="color:#95a5a6; margin-bottom:35px; font-weight: 600;">Online Member Portal</p>
+        <img src="logo.png" alt="Logo" style="width: 120px;">
+        <h1 style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 10px 0;">KADAMAY</h1>
+        <p style="color:#95a5a6; margin-bottom:30px; font-weight: 600;">Member Portal</p>
         
         <input type="text" id="serialInput" placeholder="ENTER SERIAL ID">
-        <button class="btn-main" id="btnVerify" onclick="verifyMember(false)">
-            <i class="fas fa-sign-in-alt"></i> LOGIN
-        </button>
-        <p id="loginError" style="color:#e74c3c; font-size:13px; margin-top:20px; display:none; font-weight: 600;"></p>
-        
-        <p style="font-size: 11px; color: #bdc3c7; margin-top: 35px; font-weight: 500;">Enter your ID once to stay logged in.</p>
+        <button class="btn-main" onclick="verifyMember()">LOGIN</button>
+        <p id="loginError" style="color:#e74c3c; font-size:13px; margin-top:15px; display:none;"></p>
     </div>
 
     <div id="dashboardScreen" class="dashboard">
         <div class="header">
-            <div class="top-nav">
-                <button class="btn-close" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-                
-                <button class="btn-notif" onclick="clearNotif()">
-                    <i class="fas fa-bell"></i>
-                    <span id="notifBadge" class="badge-dot"></span>
-                </button>
-            </div>
-            
             <div class="profile-info">
                 <img src="logo.png" alt="Logo" class="logo-dash">
-                
                 <h1 id="dashName">...</h1>
                 <p id="dashSerial">...</p>
-                <span id="dashStatus" class="status-badge">...</span>
             </div>
         </div>
 
         <div class="content">
-            <!-- Stats Summary -->
             <div class="stats-summary">
                 <div class="stats-row">
                     <div class="stat-item">
-                        <div class="stat-label">Total Payments</div>
-                        <div class="stat-value" id="statCount">0</div>
+                        <div class="stat-label">Total Cases</div>
+                        <div class="stat-value" id="statTotal">0</div>
                     </div>
-                    <div class="stat-item" style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(255,255,255,0.3);">
-                        <div class="stat-label">Total Amount</div>
-                        <div class="stat-value" id="statAmount">₱0</div>
+                    <div class="stat-item" style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(255,255,255,0.3); padding: 0 15px;">
+                        <div class="stat-label">Paid</div>
+                        <div class="stat-value" id="statPaid">0</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Last Payment</div>
-                        <div class="stat-value" id="statLast" style="font-size: 14px; margin-top: 8px;">—</div>
+                        <div class="stat-label">Unpaid</div>
+                        <div class="stat-value" id="statUnpaid">0</div>
                     </div>
                 </div>
             </div>
 
-            <div class="section-title">
-                <span><i class="fas fa-history" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 8px;"></i> Payment History</span>
-                <button class="btn-refresh" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-            </div>
-            <p id="payCount" style="font-size:12px; color:#95a5a6; margin-top:-15px; margin-bottom:20px; font-weight: 600;">Synced just now</p>
-
-            <div id="loading" class="loading-spinner">
-                <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #667eea;"></i>
-                <p style="margin-top: 20px; font-weight: 600;">Loading Payments...</p>
-            </div>
             <div id="paymentList"></div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://ougkeltvpikpimyqexjc.supabase.co'; 
-        const SUPABASE_KEY = 'sb_publishable_el2jm7Ejz4qDJ4igRZ0mJw_jNEpXJdl'; 
-        // ---------------------
-
+        const SUPABASE_KEY = 'sb_publishable_el2jm7Ejz4qDJ4igRZ0mJw_jNEpXJdl';
         const { createClient } = supabase;
         const _db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentMemberID = 0;
-        let realtimeChannel = null;
 
-        // --- 1. AUTO-LOGIN ON START ---
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const serialParam = urlParams.get('serial');
-
-            if (serialParam) {
-                document.getElementById('serialInput').value = serialParam;
-                verifyMember(true);
+            const saved = localStorage.getItem('kadamay_serial');
+            if (saved) {
+                document.getElementById('serialInput').value = saved;
+                verifyMember();
             } else {
-                const savedSerial = localStorage.getItem('kadamay_serial');
-                if (savedSerial) {
-                    document.getElementById('serialInput').value = savedSerial;
-                    verifyMember(true); 
-                } else {
-                    document.getElementById('initLoader').style.display = 'none';
-                    document.getElementById('loginScreen').style.display = 'block';
-                }
+                document.getElementById('initLoader').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
             }
         };
 
-        // --- 2. VERIFY / LOGIN ---
-        async function verifyMember(isAuto) {
+        async function verifyMember() {
             const input = document.getElementById('serialInput').value.trim();
-            const btn = document.getElementById('btnVerify');
-            const err = document.getElementById('loginError');
-
-            if (!input) { 
-                if(!isAuto) {
-                    err.innerText = "⚠️ Please enter your Serial ID";
-                    err.style.display = 'block';
-                }
-                return; 
-            }
-
-            if(!isAuto) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFYING...';
-            err.style.display = 'none';
+            if (!input) return;
 
             try {
                 let { data, error } = await _db
                     .from('tbl_members')
-                    .select('membersid, surname, name, isactive, memserial')
+                    .select('membersid, surname, name, memserial')
                     .eq('memserial', input)
                     .limit(1);
 
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    const member = data[0];
-                    localStorage.setItem('kadamay_serial', member.memserial);
-                    currentMemberID = member.membersid;
-                    loadDashboard(member);
+                    localStorage.setItem('kadamay_serial', data[0].memserial);
+                    currentMemberID = data[0].membersid;
+                    loadDashboard(data[0]);
                 } else {
-                    localStorage.removeItem('kadamay_serial');
-                    document.getElementById('initLoader').style.display = 'none';
-                    document.getElementById('loginScreen').style.display = 'block';
-                    err.innerText = "❌ Serial ID not found. Please try again.";
-                    err.style.display = 'block';
-                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
+                    document.getElementById('loginError').innerText = "Serial not found";
+                    document.getElementById('loginError').style.display = 'block';
                 }
             } catch (e) {
-                console.error(e);
-                document.getElementById('initLoader').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'block';
-                err.innerText = "⚠️ Connection Error. Please check your internet.";
-                err.style.display = 'block';
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
+                document.getElementById('loginError').innerText = "Connection error";
+                document.getElementById('loginError').style.display = 'block';
             }
         }
 
@@ -649,141 +391,94 @@
 
             document.getElementById('dashName').innerText = member.surname + ", " + member.name;
             document.getElementById('dashSerial').innerText = "ID: " + member.memserial;
-            
-            const statusEl = document.getElementById('dashStatus');
-            if (member.isactive) {
-                statusEl.innerText = "✓ ACTIVE MEMBER";
-                statusEl.style.background = "white";
-                statusEl.style.color = "#008080";
-            } else {
-                statusEl.innerText = "⚠ INACTIVE";
-                statusEl.style.background = "white";
-                statusEl.style.color = "#e74c3c";
-            }
 
             fetchPayments(member.membersid);
-            subscribeToRealtime(member.membersid);
         }
 
-        // --- 3. LOGOUT ---
-        function logout() {
-            if(confirm("Are you sure you want to logout?")) {
-                localStorage.removeItem('kadamay_serial');
-                if (realtimeChannel) _db.removeChannel(realtimeChannel);
-                
-                document.getElementById('dashboardScreen').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'block';
-                document.getElementById('serialInput').value = "";
-                document.getElementById('btnVerify').innerHTML = '<i class="fas fa-sign-in-alt"></i> LOGIN';
-                
-                window.history.pushState({}, document.title, window.location.pathname);
-            }
-        }
-
-        function refreshData() {
-            if(currentMemberID > 0) fetchPayments(currentMemberID);
-        }
-
-        // --- FETCH WITH STATS ---
-        async function fetchPayments(id) {
+        async function fetchPayments(memberId) {
             const list = document.getElementById('paymentList');
-            const loader = document.getElementById('loading');
-            const count = document.getElementById('payCount');
-            
-            list.innerHTML = "";
-            loader.style.display = 'block';
+            list.innerHTML = '<p style="text-align:center; color:#999;">Loading...</p>';
 
             try {
-                let { data, error } = await _db
-                    .from('qrycontribution') 
-                    .select('dtepaid, receiptno, amount, payment_remarks, deceasedname') 
-                    .eq('membersid', id)
-                    .order('dtepaid', { ascending: false });
+                // 1. Get ALL mortuary cases
+                let mortuaryRes = await _db
+                    .from('tbl_mortuary')
+                    .select('mortuaryid, dtedied, contributionpermember, tbl_members!deceasedmemberid(surname, name)')
+                    .order('dtedied', { ascending: false });
 
-                if (error) throw error;
+                if (mortuaryRes.error) throw mortuaryRes.error;
+                
+                const allCases = mortuaryRes.data || [];
 
-                loader.style.display = 'none';
-                count.innerText = (data ? data.length : 0) + " Records • Last synced " + new Date().toLocaleTimeString();
+                // 2. Get this member's contributions
+                const mortuaryIds = allCases.map(m => m.mortuaryid);
+                let contribRes = await _db
+                    .from('tbl_contribution')
+                    .select('mortuaryid, amount, dtepaid, receiptno')
+                    .eq('membersid', memberId)
+                    .in('mortuaryid', mortuaryIds);
 
-                // Update stats
-                if (data && data.length > 0) {
-                    const totalAmount = data.reduce((sum, p) => sum + (p.amount || 0), 0);
-                    const lastDate = new Date(data[0].dtepaid).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    
-                    document.getElementById('statCount').innerText = data.length;
-                    document.getElementById('statAmount').innerText = '₱' + totalAmount.toLocaleString();
-                    document.getElementById('statLast').innerText = lastDate;
+                const contributions = contribRes.data || [];
+                const paidMap = {};
+                contributions.forEach(c => {
+                    paidMap[c.mortuaryid] = c;
+                });
 
-                    data.forEach(pay => {
-                        const d = new Date(pay.dtepaid);
-                        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                        
-                        let fullRemarks = (pay.payment_remarks || '').trim();
-                        let deadName = (pay.deceasedname || '').trim();
-                        
-                        if (deadName) {
-                            if (fullRemarks) fullRemarks += " - ";
-                            fullRemarks += deadName;
-                        }
+                // 3. Build payment cards
+                let paidCount = 0;
+                let unpaidCount = 0;
+                list.innerHTML = '';
 
-                        const item = document.createElement('div');
-                        item.className = 'payment-card';
-                        item.innerHTML = `
-                            <div class="pay-left">
-                                <span class="pay-or">OR# ${pay.receiptno || 'N/A'}</span>
-                                <span class="pay-date">${dateStr}</span>
-                                ${fullRemarks ? `<span class="pay-remarks">${fullRemarks}</span>` : ''}
+                allCases.forEach(m => {
+                    const contrib = paidMap[m.mortuaryid];
+                    const isPaid = !!contrib;
+                    isPaid ? paidCount++ : unpaidCount++;
+
+                    const deceased = m.tbl_members || {};
+                    const deceasedName = `${deceased.surname || ''}, ${deceased.name || ''}`.trim();
+                    const diedDate = m.dtedied ? new Date(m.dtedied).toLocaleDateString() : '—';
+                    const amount = contrib ? contrib.amount : (m.contributionpermember || 50);
+
+                    const card = document.createElement('div');
+                    card.className = `payment-card ${isPaid ? 'paid' : 'unpaid'}`;
+                    card.innerHTML = `
+                        <div class="pay-header">
+                            <div>
+                                <div class="pay-name">${deceasedName}</div>
+                                <div class="pay-date"><i class="fas fa-calendar"></i> ${diedDate}</div>
                             </div>
-                            <div class="pay-right">
-                                ₱${(pay.amount || 0).toLocaleString()}
+                            <div class="pay-badge ${isPaid ? 'paid' : 'unpaid'}">
+                                ${isPaid ? 'PAID ✓' : 'UNPAID'}
                             </div>
-                        `;
-                        list.appendChild(item);
-                    });
-                } else {
-                    document.getElementById('statCount').innerText = '0';
-                    document.getElementById('statAmount').innerText = '₱0';
-                    document.getElementById('statLast').innerText = '—';
-                    
-                    list.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <p style="font-weight: 600; margin-top: 10px;">No payment history found</p>
-                            <p style="font-size: 12px; color: #bdc3c7; margin-top: 5px;">Your transactions will appear here</p>
+                        </div>
+                        <div class="pay-details ${isPaid ? 'paid' : 'unpaid'}">
+                            ${isPaid ? `
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+                                    <i class="fas fa-receipt"></i> OR# ${contrib.receiptno} • 
+                                    <i class="fas fa-calendar-check"></i> ${new Date(contrib.dtepaid).toLocaleDateString()}
+                                </div>
+                                <div style="font-size: 18px; font-weight: 700; color: #10b981;">
+                                    ₱${amount.toLocaleString()}
+                                </div>
+                            ` : `
+                                <div style="font-size: 13px; color: #ef4444; font-weight: 600;">
+                                    <i class="fas fa-exclamation-circle"></i> Payment Required: ₱${amount.toLocaleString()}
+                                </div>
+                            `}
                         </div>
                     `;
-                }
+                    list.appendChild(card);
+                });
+
+                // Update stats
+                document.getElementById('statTotal').innerText = allCases.length;
+                document.getElementById('statPaid').innerText = paidCount;
+                document.getElementById('statUnpaid').innerText = unpaidCount;
 
             } catch (e) {
                 console.error(e);
-                alert("ERROR: " + e.message + "\n\nHint: Check if column 'deceasedname' is in your database View.");
-                loader.style.display = 'none';
+                list.innerHTML = '<p style="color:red; text-align:center;">Error loading data</p>';
             }
-        }
-
-        function subscribeToRealtime(id) {
-            if (realtimeChannel) _db.removeChannel(realtimeChannel);
-            realtimeChannel = _db
-                .channel('payment-updates')
-                .on(
-                    'postgres_changes', 
-                    { event: 'INSERT', schema: 'public', table: 'tbl_contribution', filter: 'membersid=eq.' + id }, 
-                    (payload) => {
-                        playSound();
-                        document.getElementById('notifBadge').style.display = 'block';
-                        refreshData();
-                    }
-                )
-                .subscribe();
-        }
-
-        function playSound() {
-            const audio = document.getElementById('notifSound');
-            audio.play().catch(e => {});
-        }
-
-        function clearNotif() {
-            document.getElementById('notifBadge').style.display = 'none';
         }
     </script>
 </body>
