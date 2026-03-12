@@ -78,6 +78,77 @@
             animation: slideIn 0.4s ease-out;
         }
         
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 13px;
+            padding: 10px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-notif {
+            position: relative;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-notif:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 14px;
+            height: 14px;
+            background: #ff4757;
+            border-radius: 50%;
+            border: 3px solid #008080;
+            display: none;
+            animation: pulseDot 1.5s infinite;
+            box-shadow: 0 0 10px rgba(255,71,87,0.8);
+        }
+        
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        
         .profile-info { 
             text-align: center; 
             margin-top: 15px; 
@@ -309,6 +380,17 @@
 
     <div id="dashboardScreen" class="dashboard">
         <div class="header">
+            <div class="top-nav">
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+                
+                <button class="btn-notif" onclick="clearNotif()">
+                    <i class="fas fa-bell"></i>
+                    <span id="notifBadge" class="badge-dot"></span>
+                </button>
+            </div>
+            
             <div class="profile-info">
                 <img src="logo.png" alt="Logo" class="logo-dash">
                 <h1 id="dashName">...</h1>
@@ -345,6 +427,7 @@
         const _db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentMemberID = 0;
+        let realtimeChannel = null;
 
         window.onload = function() {
             const saved = localStorage.getItem('kadamay_serial');
@@ -384,6 +467,23 @@
             }
         }
 
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('kadamay_serial');
+                if (realtimeChannel) _db.removeChannel(realtimeChannel);
+                
+                document.getElementById('dashboardScreen').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('serialInput').value = "";
+                
+                window.history.pushState({}, document.title, window.location.pathname);
+            }
+        }
+
+        function clearNotif() {
+            document.getElementById('notifBadge').style.display = 'none';
+        }
+
         async function loadDashboard(member) {
             document.getElementById('initLoader').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'none';
@@ -393,6 +493,23 @@
             document.getElementById('dashSerial').innerText = "ID: " + member.memserial;
 
             fetchPayments(member.membersid);
+            subscribeToRealtime(member.membersid);
+        }
+
+        function subscribeToRealtime(memberId) {
+            if (realtimeChannel) _db.removeChannel(realtimeChannel);
+            
+            realtimeChannel = _db
+                .channel('payment-updates')
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'tbl_contribution', filter: 'membersid=eq.' + memberId },
+                    (payload) => {
+                        document.getElementById('notifBadge').style.display = 'block';
+                        fetchPayments(memberId);
+                    }
+                )
+                .subscribe();
         }
 
         async function fetchPayments(memberId) {
