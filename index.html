@@ -216,6 +216,55 @@
             animation: pulse 2s infinite;
         }
         
+        /* TAB SYSTEM */
+        .tab-container {
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease-out 0.5s both;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .payment-card { 
             background: white;
             padding: 18px; 
@@ -402,21 +451,41 @@
             <div class="stats-summary">
                 <div class="stats-row">
                     <div class="stat-item">
-                        <div class="stat-label">Total Cases</div>
-                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total Payments</div>
+                        <div class="stat-value" id="statPaidTotal">0</div>
                     </div>
                     <div class="stat-item" style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(255,255,255,0.3); padding: 0 15px;">
-                        <div class="stat-label">Paid</div>
-                        <div class="stat-value" id="statPaid">0</div>
+                        <div class="stat-label">Total Amount</div>
+                        <div class="stat-value" id="statAmount">₱0</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Unpaid</div>
+                        <div class="stat-label">Unpaid Cases</div>
                         <div class="stat-value" id="statUnpaid">0</div>
                     </div>
                 </div>
             </div>
 
-            <div id="paymentList"></div>
+            <!-- TABS -->
+            <div class="tab-container">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('history')">
+                        <i class="fas fa-history"></i> Payment History
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('unpaid')">
+                        <i class="fas fa-exclamation-circle"></i> Unpaid Cases
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB CONTENT: Payment History -->
+            <div id="historyTab" class="tab-content active">
+                <div id="paymentHistory"></div>
+            </div>
+
+            <!-- TAB CONTENT: Unpaid Cases -->
+            <div id="unpaidTab" class="tab-content">
+                <div id="unpaidCases"></div>
+            </div>
         </div>
     </div>
 
@@ -428,6 +497,20 @@
 
         let currentMemberID = 0;
         let realtimeChannel = null;
+
+        function switchTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tab-btn').classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            if (tab === 'history') {
+                document.getElementById('historyTab').classList.add('active');
+            } else {
+                document.getElementById('unpaidTab').classList.add('active');
+            }
+        }
 
         window.onload = function() {
             const saved = localStorage.getItem('kadamay_serial');
@@ -513,88 +596,148 @@
         }
 
         async function fetchPayments(memberId) {
-            const list = document.getElementById('paymentList');
-            list.innerHTML = '<p style="text-align:center; color:#999;">Loading...</p>';
+            const historyList = document.getElementById('paymentHistory');
+            const unpaidList = document.getElementById('unpaidCases');
+            
+            historyList.innerHTML = '<p style="text-align:center; color:#999; padding: 40px;">Loading...</p>';
+            unpaidList.innerHTML = '<p style="text-align:center; color:#999; padding: 40px;">Loading...</p>';
 
             try {
-                // 1. Get ALL mortuary cases
+                // 1. Get ALL member's contributions (Payment History)
+                let allContribRes = await _db
+                    .from('tbl_contribution')
+                    .select('contributionid, dtepaid, receiptno, amount, remarksid, mortuaryid')
+                    .eq('membersid', memberId)
+                    .order('dtepaid', { ascending: false });
+
+                const allPayments = allContribRes.data || [];
+
+                // Get remarks for payment history
+                const remarksIds = [...new Set(allPayments.map(p => p.remarksid).filter(Boolean))];
+                let remarksMap = {};
+                if (remarksIds.length > 0) {
+                    let remarksRes = await _db
+                        .from('tbl_remarks')
+                        .select('remarksid, remarks')
+                        .in('remarksid', remarksIds);
+                    remarksRes.data?.forEach(r => {
+                        remarksMap[r.remarksid] = r.remarks;
+                    });
+                }
+
+                // Get deceased names for payments
+                const mortuaryIds = [...new Set(allPayments.map(p => p.mortuaryid).filter(Boolean))];
+                let deceasedMap = {};
+                if (mortuaryIds.length > 0) {
+                    let mortRes = await _db
+                        .from('tbl_mortuary')
+                        .select('mortuaryid, tbl_members!deceasedmemberid(surname, name)')
+                        .in('mortuaryid', mortuaryIds);
+                    mortRes.data?.forEach(m => {
+                        const deceased = m.tbl_members || {};
+                        deceasedMap[m.mortuaryid] = `${deceased.surname || ''}, ${deceased.name || ''}`.trim();
+                    });
+                }
+
+                // 2. Get ALL mortuary cases for unpaid
                 let mortuaryRes = await _db
                     .from('tbl_mortuary')
                     .select('mortuaryid, dtedied, contributionpermember, tbl_members!deceasedmemberid(surname, name)')
                     .order('dtedied', { ascending: false });
 
-                if (mortuaryRes.error) throw mortuaryRes.error;
-                
                 const allCases = mortuaryRes.data || [];
+                const paidMortuaryIds = allPayments.filter(p => p.mortuaryid).map(p => p.mortuaryid);
 
-                // 2. Get this member's contributions
-                const mortuaryIds = allCases.map(m => m.mortuaryid);
-                let contribRes = await _db
-                    .from('tbl_contribution')
-                    .select('mortuaryid, amount, dtepaid, receiptno')
-                    .eq('membersid', memberId)
-                    .in('mortuaryid', mortuaryIds);
+                // Build Payment History Tab
+                historyList.innerHTML = '';
+                if (allPayments.length > 0) {
+                    allPayments.forEach((p, index) => {
+                        const paidDate = p.dtepaid ? new Date(p.dtepaid).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                        const remarks = remarksMap[p.remarksid] || 'Payment';
+                        const deceasedName = deceasedMap[p.mortuaryid] || '';
+                        const fullRemarks = deceasedName ? `${remarks} - ${deceasedName}` : remarks;
 
-                const contributions = contribRes.data || [];
-                const paidMap = {};
-                contributions.forEach(c => {
-                    paidMap[c.mortuaryid] = c;
-                });
-
-                // 3. Build payment cards
-                let paidCount = 0;
-                let unpaidCount = 0;
-                list.innerHTML = '';
-
-                allCases.forEach(m => {
-                    const contrib = paidMap[m.mortuaryid];
-                    const isPaid = !!contrib;
-                    isPaid ? paidCount++ : unpaidCount++;
-
-                    const deceased = m.tbl_members || {};
-                    const deceasedName = `${deceased.surname || ''}, ${deceased.name || ''}`.trim();
-                    const diedDate = m.dtedied ? new Date(m.dtedied).toLocaleDateString() : '—';
-                    const amount = contrib ? contrib.amount : (m.contributionpermember || 50);
-
-                    const card = document.createElement('div');
-                    card.className = `payment-card ${isPaid ? 'paid' : 'unpaid'}`;
-                    card.innerHTML = `
-                        <div class="pay-header">
-                            <div>
-                                <div class="pay-name">${deceasedName}</div>
-                                <div class="pay-date"><i class="fas fa-calendar"></i> ${diedDate}</div>
+                        const card = document.createElement('div');
+                        card.className = 'payment-card paid';
+                        card.style.animationDelay = `${0.5 + index * 0.1}s`;
+                        card.innerHTML = `
+                            <div class="pay-header">
+                                <div>
+                                    <div class="pay-name">OR# ${p.receiptno || 'N/A'}</div>
+                                    <div class="pay-date"><i class="fas fa-calendar"></i> ${paidDate}</div>
+                                    <div style="font-size: 11px; color: #95a5a6; margin-top: 4px; font-style: italic;">
+                                        ${fullRemarks}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="pay-badge paid">PAID ✓</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: #10b981; margin-top: 8px;">
+                                        ₱${p.amount.toLocaleString()}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="pay-badge ${isPaid ? 'paid' : 'unpaid'}">
-                                ${isPaid ? 'PAID ✓' : 'UNPAID'}
-                            </div>
+                        `;
+                        historyList.appendChild(card);
+                    });
+                } else {
+                    historyList.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: #95a5a6;">
+                            <i class="fas fa-inbox" style="font-size: 3.5rem; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
+                            <p style="font-weight: 600; margin-top: 10px;">No payment history</p>
                         </div>
-                        <div class="pay-details ${isPaid ? 'paid' : 'unpaid'}">
-                            ${isPaid ? `
-                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
-                                    <i class="fas fa-receipt"></i> OR# ${contrib.receiptno} • 
-                                    <i class="fas fa-calendar-check"></i> ${new Date(contrib.dtepaid).toLocaleDateString()}
+                    `;
+                }
+
+                // Build Unpaid Cases Tab
+                unpaidList.innerHTML = '';
+                const unpaidCases = allCases.filter(m => !paidMortuaryIds.includes(m.mortuaryid));
+                
+                if (unpaidCases.length > 0) {
+                    unpaidCases.forEach((m, index) => {
+                        const deceased = m.tbl_members || {};
+                        const deceasedName = `${deceased.surname || ''}, ${deceased.name || ''}`.trim();
+                        const diedDate = m.dtedied ? new Date(m.dtedied).toLocaleDateString() : '—';
+                        const amount = m.contributionpermember || 50;
+
+                        const card = document.createElement('div');
+                        card.className = 'payment-card unpaid';
+                        card.style.animationDelay = `${0.5 + index * 0.1}s`;
+                        card.innerHTML = `
+                            <div class="pay-header">
+                                <div>
+                                    <div class="pay-name">${deceasedName}</div>
+                                    <div class="pay-date"><i class="fas fa-calendar"></i> ${diedDate}</div>
                                 </div>
-                                <div style="font-size: 18px; font-weight: 700; color: #10b981;">
-                                    ₱${amount.toLocaleString()}
-                                </div>
-                            ` : `
+                                <div class="pay-badge unpaid">UNPAID</div>
+                            </div>
+                            <div class="pay-details unpaid">
                                 <div style="font-size: 13px; color: #ef4444; font-weight: 600;">
                                     <i class="fas fa-exclamation-circle"></i> Payment Required: ₱${amount.toLocaleString()}
                                 </div>
-                            `}
+                            </div>
+                        `;
+                        unpaidList.appendChild(card);
+                    });
+                } else {
+                    unpaidList.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: #95a5a6;">
+                            <i class="fas fa-check-circle" style="font-size: 3.5rem; opacity: 0.3; color: #10b981; display: block; margin-bottom: 15px;"></i>
+                            <p style="font-weight: 600; margin-top: 10px; color: #10b981;">All caught up!</p>
+                            <p style="font-size: 12px; margin-top: 5px;">No outstanding payments</p>
                         </div>
                     `;
-                    list.appendChild(card);
-                });
+                }
 
                 // Update stats
-                document.getElementById('statTotal').innerText = allCases.length;
-                document.getElementById('statPaid').innerText = paidCount;
-                document.getElementById('statUnpaid').innerText = unpaidCount;
+                const totalAmount = allPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+                document.getElementById('statPaidTotal').innerText = allPayments.length;
+                document.getElementById('statAmount').innerText = '₱' + totalAmount.toLocaleString();
+                document.getElementById('statUnpaid').innerText = unpaidCases.length;
 
             } catch (e) {
                 console.error(e);
-                list.innerHTML = '<p style="color:red; text-align:center;">Error loading data</p>';
+                historyList.innerHTML = '<p style="color:red; text-align:center; padding: 40px;">Error loading data</p>';
+                unpaidList.innerHTML = '<p style="color:red; text-align:center; padding: 40px;">Error loading data</p>';
             }
         }
     </script>
