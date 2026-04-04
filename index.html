@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KADAMAY Portal</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#008080">
+    <link rel="manifest" href="static/manifest.json">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .login-card {
+            background: white;
+            width: 90%;
+            max-width: 420px;
+            padding: 40px 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .dashboard {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            background: rgba(255,255,255,0.95);
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #008080 0%, #00a896 100%);
+            color: white;
+            padding: 25px 20px 35px;
+            position: relative;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 13px;
+            padding: 10px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-notif {
+            position: relative;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-notif:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 14px;
+            height: 14px;
+            background: #ff4757;
+            border-radius: 50%;
+            border: 3px solid #008080;
+            display: none;
+            animation: pulseDot 1.5s infinite;
+            box-shadow: 0 0 10px rgba(255,71,87,0.8);
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-top: 15px;
+            position: relative;
+            z-index: 10;
+            animation: fadeIn 0.5s ease-out 0.2s both;
+        }
+
+        .logo-dash {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+        }
+
+        .logo-dash:hover {
+            transform: rotate(360deg) scale(1.1);
+        }
+
+        .profile-info h1 {
+            font-size: 22px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .content {
+            padding: 30px 20px;
+            animation: slideInLeft 0.5s ease-out 0.3s both;
+        }
+
+        .stats-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+            animation: slideIn 0.5s ease-out 0.4s both;
+        }
+
+        .stats-row { display: flex; justify-content: space-around; }
+        .stat-item {
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* TAB SYSTEM */
+        .tab-container {
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease-out 0.5s both;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .payment-card {
+            background: white;
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.4s ease-out backwards;
+        }
+
+        .payment-card:nth-child(1) { animation-delay: 0.1s; }
+        .payment-card:nth-child(2) { animation-delay: 0.2s; }
+        .payment-card:nth-child(3) { animation-delay: 0.3s; }
+        .payment-card:nth-child(4) { animation-delay: 0.4s; }
+        .payment-card:nth-child(n+5) { animation-delay: 0.5s; }
+
+        .payment-card.paid { border-left: 5px solid #10b981; }
+        .payment-card.unpaid { border-left: 5px solid #ef4444; }
+
+        .payment-card:hover {
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .pay-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .pay-name { font-weight: 700; font-size: 15px; color: #2c3e50; }
+        .pay-date { font-size: 12px; color: #95a5a6; margin-top: 4px; }
+
+        .pay-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .pay-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .pay-badge.paid {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 10px rgba(16,185,129,0.3);
+        }
+
+        .pay-badge.unpaid {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 10px rgba(239,68,68,0.3);
+        }
+
+        .pay-details {
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .pay-details:hover {
+            transform: scale(1.02);
+        }
+
+        .pay-details.paid {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+        }
+
+        .pay-details.unpaid {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+
+        .btn-main:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102,126,234,0.4);
+        }
+
+        .btn-main:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-main:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-retry {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        .loading-overlay i {
+            animation: spin 1s linear infinite;
+        }
+
+        .dashboard::-webkit-scrollbar { width: 6px; }
+        .dashboard::-webkit-scrollbar-track { background: #f1f1f1; }
+        .dashboard::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="initLoader" class="loading-overlay">
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: white;"></i>
+        <p style="color: white; margin-top: 20px; font-weight: 700;">LOADING...</p>
+    </div>
+
+    <div id="loginScreen" class="login-card" style="display:none;">
+        <img src="static/kadamay_logo.png" alt="KADAMAY Logo" style="width: 120px;">
+        <h1 style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 10px 0;">KADAMAY</h1>
+        <p style="color:#95a5a6; margin-bottom:30px; font-weight: 600;">Member Portal</p>
+
+        <input type="text" id="serialInput" placeholder="ENTER SERIAL ID"
+               autocomplete="off" maxlength="20"
+               onkeydown="if(event.key==='Enter') verifyMember()">
+        <button class="btn-main" id="loginBtn" onclick="verifyMember()">
+            <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>LOGIN
+        </button>
+        <p id="loginError" style="color:#e74c3c; font-size:13px; margin-top:15px; display:none;"></p>
+    </div>
+
+    <div id="dashboardScreen" class="dashboard">
+        <div class="header">
+            <div class="top-nav">
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+
+                <button class="btn-notif" onclick="clearNotif()" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notifBadge" class="badge-dot"></span>
+                </button>
+            </div>
+
+            <div class="profile-info">
+                <img src="static/kadamay_logo.png" alt="KADAMAY Logo" class="logo-dash">
+                <h1 id="dashName">...</h1>
+                <p id="dashSerial">...</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="stats-summary">
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Payments</div>
+                        <div class="stat-value" id="statPaidTotal">0</div>
+                    </div>
+                    <div class="stat-item" style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(255,255,255,0.3); padding: 0 15px;">
+                        <div class="stat-label">Total Amount</div>
+                        <div class="stat-value" id="statAmount">&#8369;0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Unpaid Cases</div>
+                        <div class="stat-value" id="statUnpaid">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-container">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab(event, 'history')">
+                        <i class="fas fa-history"></i> Payment History
+                    </button>
+                    <button class="tab-btn" onclick="switchTab(event, 'unpaid')">
+                        <i class="fas fa-exclamation-circle"></i> Unpaid Cases
+                    </button>
+                </div>
+            </div>
+
+            <div id="historyTab" class="tab-content active">
+                <div id="paymentHistory"></div>
+            </div>
+
+            <div id="unpaidTab" class="tab-content">
+                <div id="unpaidCases"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ougkeltvpikpimyqexjc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_el2jm7Ejz4qDJ4igRZ0mJw_jNEpXJdl';
+        const { createClient } = supabase;
+        const _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentMemberID = 0;
+        let realtimeChannel = null;
+
+        // XSS protection: escape all DB values before inserting into HTML
+        function sanitize(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function switchTab(event, tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab === 'history' ? 'historyTab' : 'unpaidTab').classList.add('active');
+        }
+
+        window.onload = function() {
+            const saved = localStorage.getItem('kadamay_serial');
+            if (saved) {
+                document.getElementById('serialInput').value = saved;
+                verifyMember();
+            } else {
+                document.getElementById('initLoader').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+            }
+        };
+
+        async function verifyMember() {
+            const input = document.getElementById('serialInput').value.trim().toUpperCase();
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
+
+            errorEl.style.display = 'none';
+
+            if (!input) return;
+
+            // Basic input validation — only allow alphanumeric and hyphens
+            if (!/^[A-Z0-9\-]{2,20}$/.test(input)) {
+                errorEl.innerText = 'Invalid Serial ID format';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px;"></i>Verifying...';
+
+            try {
+                let { data, error } = await _db
+                    .from('tbl_members')
+                    .select('membersid, surname, name, memserial')
+                    .eq('memserial', input)
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    localStorage.setItem('kadamay_serial', data[0].memserial);
+                    currentMemberID = data[0].membersid;
+                    loadDashboard(data[0]);
+                } else {
+                    errorEl.innerText = 'Serial ID not found. Please check and try again.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>LOGIN';
+                }
+            } catch (e) {
+                errorEl.innerText = 'Connection error. Please try again.';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>LOGIN';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('kadamay_serial');
+            if (realtimeChannel) _db.removeChannel(realtimeChannel);
+            currentMemberID = 0;
+
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('serialInput').value = '';
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>LOGIN';
+
+            window.history.pushState({}, document.title, window.location.pathname);
+        }
+
+        function clearNotif() {
+            document.getElementById('notifBadge').style.display = 'none';
+        }
+
+        async function loadDashboard(member) {
+            document.getElementById('initLoader').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+
+            document.getElementById('dashName').innerText = member.surname + ', ' + member.name;
+            document.getElementById('dashSerial').innerText = 'ID: ' + member.memserial;
+
+            fetchPayments(member.membersid);
+            subscribeToRealtime(member.membersid);
+        }
+
+        function subscribeToRealtime(memberId) {
+            if (realtimeChannel) _db.removeChannel(realtimeChannel);
+
+            realtimeChannel = _db
+                .channel('payment-updates-' + memberId)
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'tbl_contribution', filter: 'membersid=eq.' + memberId },
+                    () => {
+                        document.getElementById('notifBadge').style.display = 'block';
+                        fetchPayments(memberId);
+                    }
+                )
+                .subscribe();
+        }
+
+        function showFetchError(msg) {
+            const errorHtml = `
+                <div style="text-align:center; padding: 40px 20px; color:#95a5a6;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:2.5rem; color:#ef4444; display:block; margin-bottom:12px;"></i>
+                    <p style="font-weight:600;">${sanitize(msg)}</p>
+                    <button class="btn-retry" onclick="fetchPayments(currentMemberID)">
+                        <i class="fas fa-redo"></i> Retry
+                    </button>
+                </div>`;
+            document.getElementById('paymentHistory').innerHTML = errorHtml;
+            document.getElementById('unpaidCases').innerHTML = errorHtml;
+        }
+
+        async function fetchPayments(memberId) {
+            const historyList = document.getElementById('paymentHistory');
+            const unpaidList = document.getElementById('unpaidCases');
+
+            const loadingHtml = '<p style="text-align:center; color:#999; padding: 40px;"><i class="fas fa-circle-notch fa-spin"></i> Loading...</p>';
+            historyList.innerHTML = loadingHtml;
+            unpaidList.innerHTML = loadingHtml;
+
+            try {
+                // 1. Member's contributions (Payment History)
+                let allContribRes = await _db
+                    .from('tbl_contribution')
+                    .select('contributionid, dtepaid, receiptno, amount, remarksid, mortuaryid, is_canceled')
+                    .eq('membersid', memberId)
+                    .order('dtepaid', { ascending: false });
+
+                if (allContribRes.error) throw allContribRes.error;
+                const allPayments = allContribRes.data || [];
+
+                // 2. Remarks lookup
+                const remarksIds = [...new Set(allPayments.map(p => p.remarksid).filter(Boolean))];
+                let remarksMap = {};
+                if (remarksIds.length > 0) {
+                    let remarksRes = await _db
+                        .from('tbl_remarks')
+                        .select('remarksid, remarks')
+                        .in('remarksid', remarksIds);
+                    remarksRes.data?.forEach(r => { remarksMap[r.remarksid] = r.remarks; });
+                }
+
+                // 3. Deceased names for paid contributions
+                const mortuaryIds = [...new Set(allPayments.map(p => p.mortuaryid).filter(Boolean))];
+                let deceasedMap = {};
+                if (mortuaryIds.length > 0) {
+                    let mortRes = await _db
+                        .from('tbl_mortuary')
+                        .select('mortuaryid, tbl_members!deceasedmemberid(surname, name)')
+                        .in('mortuaryid', mortuaryIds);
+                    mortRes.data?.forEach(m => {
+                        const d = m.tbl_members || {};
+                        deceasedMap[m.mortuaryid] = `${d.surname || ''}, ${d.name || ''}`.trim();
+                    });
+                }
+
+                // 4. All mortuary cases — member must pay for every death in the org
+                let mortuaryRes = await _db
+                    .from('tbl_mortuary')
+                    .select('mortuaryid, dtedied, contributionpermember, tbl_members!deceasedmemberid(surname, name)')
+                    .order('dtedied', { ascending: false });
+
+                if (mortuaryRes.error) throw mortuaryRes.error;
+                const allCases = mortuaryRes.data || [];
+                // Only non-canceled contributions count as paid (mirrors app.py paid_map logic)
+                const paidMortuaryIds = allPayments
+                    .filter(p => p.mortuaryid && !p.is_canceled)
+                    .map(p => p.mortuaryid);
+
+                // Build Payment History Tab
+                historyList.innerHTML = '';
+                if (allPayments.length > 0) {
+                    allPayments.forEach((p, index) => {
+                        const isCanceled = !!p.is_canceled;
+                        const paidDate = p.dtepaid
+                            ? new Date(p.dtepaid).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                            : '—';
+                        const remarks = sanitize(remarksMap[p.remarksid] || 'Payment');
+                        const deceasedName = sanitize(deceasedMap[p.mortuaryid] || '');
+                        const fullRemarks = deceasedName ? `${remarks} &mdash; ${deceasedName}` : remarks;
+                        const receiptNo = sanitize(p.receiptno || 'N/A');
+                        const amount = (p.amount || 0).toLocaleString();
+                        const cardClass = isCanceled ? 'unpaid' : 'paid';
+                        const badgeHtml = isCanceled
+                            ? `<div class="pay-badge unpaid">CANCELED</div>`
+                            : `<div class="pay-badge paid">PAID &#10003;</div>`;
+                        const amountColor = isCanceled ? '#ef4444' : '#10b981';
+                        const amountStyle = isCanceled ? 'text-decoration:line-through;' : '';
+
+                        const card = document.createElement('div');
+                        card.className = `payment-card ${cardClass}`;
+                        card.style.animationDelay = `${Math.min(index * 0.1, 0.5)}s`;
+                        card.innerHTML = `
+                            <div class="pay-header">
+                                <div>
+                                    <div class="pay-name">OR# ${receiptNo}</div>
+                                    <div class="pay-date"><i class="fas fa-calendar"></i> ${sanitize(paidDate)}</div>
+                                    <div style="font-size:11px; color:#95a5a6; margin-top:4px; font-style:italic;">${fullRemarks}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    ${badgeHtml}
+                                    <div style="font-size:18px; font-weight:700; color:${amountColor}; margin-top:8px; ${amountStyle}">&#8369;${amount}</div>
+                                </div>
+                            </div>`;
+                        historyList.appendChild(card);
+                    });
+                } else {
+                    historyList.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px; color:#95a5a6;">
+                            <i class="fas fa-inbox" style="font-size:3.5rem; opacity:0.3; display:block; margin-bottom:15px;"></i>
+                            <p style="font-weight:600; margin-top:10px;">No payment history</p>
+                        </div>`;
+                }
+
+                // Build Unpaid Cases Tab
+                unpaidList.innerHTML = '';
+                const unpaidCases = allCases.filter(m => !paidMortuaryIds.includes(m.mortuaryid));
+
+                if (unpaidCases.length > 0) {
+                    unpaidCases.forEach((m, index) => {
+                        const deceased = m.tbl_members || {};
+                        const deceasedName = sanitize(`${deceased.surname || ''}, ${deceased.name || ''}`.trim());
+                        const diedDate = sanitize(m.dtedied ? new Date(m.dtedied).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—');
+                        const amount = (m.contributionpermember || 50).toLocaleString();
+
+                        const card = document.createElement('div');
+                        card.className = 'payment-card unpaid';
+                        card.style.animationDelay = `${Math.min(index * 0.1, 0.5)}s`;
+                        card.innerHTML = `
+                            <div class="pay-header">
+                                <div>
+                                    <div class="pay-name">${deceasedName}</div>
+                                    <div class="pay-date"><i class="fas fa-calendar"></i> ${diedDate}</div>
+                                </div>
+                                <div class="pay-badge unpaid">UNPAID</div>
+                            </div>
+                            <div class="pay-details unpaid">
+                                <div style="font-size:13px; color:#ef4444; font-weight:600;">
+                                    <i class="fas fa-exclamation-circle"></i> Payment Required: &#8369;${amount}
+                                </div>
+                            </div>`;
+                        unpaidList.appendChild(card);
+                    });
+                } else {
+                    unpaidList.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px; color:#95a5a6;">
+                            <i class="fas fa-check-circle" style="font-size:3.5rem; color:#10b981; opacity:0.5; display:block; margin-bottom:15px;"></i>
+                            <p style="font-weight:600; color:#10b981;">All caught up!</p>
+                            <p style="font-size:12px; margin-top:5px;">No outstanding payments</p>
+                        </div>`;
+                }
+
+                // Update stats — exclude canceled contributions from totals
+                const activePayments = allPayments.filter(p => !p.is_canceled);
+                const totalAmount = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+                document.getElementById('statPaidTotal').innerText = activePayments.length;
+                document.getElementById('statAmount').innerText = '₱' + totalAmount.toLocaleString();
+                document.getElementById('statUnpaid').innerText = unpaidCases.length;
+
+            } catch (e) {
+                console.error(e);
+                showFetchError('Failed to load data. Check your connection.');
+            }
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('static/service-worker.js');
+        }
+    </script>
+</body>
+</html>

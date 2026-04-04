@@ -1,0 +1,25 @@
+# Reference code — proprietary Flask backend (DO NOT PUSH)
+reference/
+
+# Claude Code local settings
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# Environment & secrets
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
