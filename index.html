@@ -545,12 +545,11 @@
 
         window.onload = function() {
             const saved = localStorage.getItem('kadamay_serial');
+            document.getElementById('initLoader').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
             if (saved) {
                 document.getElementById('serialInput').value = saved;
-                verifyMember();
-            } else {
-                document.getElementById('initLoader').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('surnameInput').focus();
             }
         };
 
