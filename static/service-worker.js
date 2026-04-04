@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kadamay-v1';
+const CACHE_NAME = 'kadamay-v2';
 const urlsToCache = [
   '/',
   '/static/images/kadamay_logo.png',
