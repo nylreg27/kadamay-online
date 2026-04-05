@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kadamay-v2';
+const CACHE_NAME = 'kadamay-v3';
 const urlsToCache = [
   '/',
   '/static/images/kadamay_logo.png',
@@ -23,9 +23,11 @@ self.addEventListener('fetch', event => {
         }
         // Otherwise fetch from network, and optionally cache for future
         return fetch(event.request).then(networkResponse => {
-          // If it's a GET request and not a chrome-extension request, cache it
-          if (event.request.method === 'GET' && 
-              event.request.url.indexOf('chrome-extension') === -1) {
+          // Cache only static assets — never cache API or Supabase responses
+          if (event.request.method === 'GET' &&
+              event.request.url.indexOf('chrome-extension') === -1 &&
+              event.request.url.indexOf('supabase.co') === -1 &&
+              event.request.url.indexOf('/api/') === -1) {
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => {
               cache.put(event.request, responseToCache);
