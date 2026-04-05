@@ -526,6 +526,7 @@
         const _db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentMemberID = 0;
+        let currentDteContributed = null;
         let realtimeChannel = null;
         let loginAttempts = 0;
         let loginLockedUntil = 0;
@@ -594,7 +595,7 @@
             try {
                 let { data, error } = await _db
                     .from('tbl_members')
-                    .select('membersid, surname, name, memserial')
+                    .select('membersid, surname, name, memserial, dtecontributed')
                     .eq('memserial', input)
                     .limit(1);
 
@@ -607,6 +608,7 @@
                     loginAttempts = 0;
                     localStorage.setItem('kadamay_serial', data[0].memserial);
                     currentMemberID = data[0].membersid;
+                    currentDteContributed = data[0].dtecontributed || null;
                     loadDashboard(data[0]);
                 } else {
                     loginAttempts++;
@@ -660,7 +662,7 @@
             document.getElementById('dashName').innerText = member.surname + ', ' + member.name;
             document.getElementById('dashSerial').innerText = 'ID: ' + member.memserial;
 
-            fetchPayments(member.membersid);
+            fetchPayments(member.membersid, member.dtecontributed);
             subscribeToRealtime(member.membersid);
         }
 
@@ -674,7 +676,7 @@
                     { event: 'INSERT', schema: 'public', table: 'tbl_contribution', filter: 'membersid=eq.' + memberId },
                     () => {
                         document.getElementById('notifBadge').style.display = 'block';
-                        fetchPayments(memberId);
+                        fetchPayments(memberId, currentDteContributed);
                     }
                 )
                 .subscribe();
@@ -685,7 +687,7 @@
                 <div style="text-align:center; padding: 40px 20px; color:#95a5a6;">
                     <i class="fas fa-exclamation-triangle" style="font-size:2.5rem; color:#ef4444; display:block; margin-bottom:12px;"></i>
                     <p style="font-weight:600;">${sanitize(msg)}</p>
-                    <button class="btn-retry" onclick="fetchPayments(currentMemberID)">
+                    <button class="btn-retry" onclick="fetchPayments(currentMemberID, currentDteContributed)">
                         <i class="fas fa-redo"></i> Retry
                     </button>
                 </div>`;
@@ -693,7 +695,7 @@
             document.getElementById('unpaidCases').innerHTML = errorHtml;
         }
 
-        async function fetchPayments(memberId) {
+        async function fetchPayments(memberId, dteContributed) {
             const historyList = document.getElementById('paymentHistory');
             const unpaidList = document.getElementById('unpaidCases');
 
@@ -798,7 +800,12 @@
 
                 // Build Unpaid Cases Tab
                 unpaidList.innerHTML = '';
-                const unpaidCases = allCases.filter(m => !paidMortuaryIds.includes(m.mortuaryid));
+                // Only show cases where date of death is on or after the member's date joined
+                const unpaidCases = allCases.filter(m => {
+                    if (paidMortuaryIds.includes(m.mortuaryid)) return false;
+                    if (dteContributed && m.dtedied && m.dtedied < dteContributed) return false;
+                    return true;
+                });
 
                 if (unpaidCases.length > 0) {
                     unpaidCases.forEach((m, index) => {
