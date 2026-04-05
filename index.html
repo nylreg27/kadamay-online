@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#008080">
-    <link rel="manifest" href="static/manifest.json">
+    <link rel="manifest" href="/static/manifest.json">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -439,7 +439,7 @@
     </div>
 
     <div id="loginScreen" class="login-card" style="display:none;">
-        <img src="static/kadamay_logo.png" alt="KADAMAY Logo" style="width: 120px;">
+        <img src="/static/kadamay_logo.png" alt="KADAMAY Logo" style="width: 120px;">
         <h1 style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 10px 0;">KADAMAY</h1>
         <p style="color:#95a5a6; margin-bottom:30px; font-weight: 600;">Member Portal</p>
 
@@ -469,7 +469,7 @@
             </div>
 
             <div class="profile-info">
-                <img src="static/kadamay_logo.png" alt="KADAMAY Logo" class="logo-dash">
+                <img src="/static/kadamay_logo.png" alt="KADAMAY Logo" class="logo-dash">
                 <h1 id="dashName">...</h1>
                 <p id="dashSerial">...</p>
             </div>
@@ -809,7 +809,7 @@
         }
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('static/service-worker.js');
+            navigator.serviceWorker.register('/service-worker.js');
         }
     </script>
 </body>
