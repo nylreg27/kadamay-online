@@ -8,8 +8,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#008080">
-    <link rel="manifest" href="/static/manifest.json">
+    <link rel="manifest" href="static/manifest.json">
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -439,7 +440,7 @@
     </div>
 
     <div id="loginScreen" class="login-card" style="display:none;">
-        <img src="/static/kadamay_logo.png" alt="KADAMAY Logo" style="width: 120px;">
+        <img src="static/kadamay_logo.png" alt="KADAMAY Logo" style="width: 120px;">
         <h1 style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 10px 0;">KADAMAY</h1>
         <p style="color:#95a5a6; margin-bottom:30px; font-weight: 600;">Member Portal</p>
 
@@ -469,7 +470,7 @@
             </div>
 
             <div class="profile-info">
-                <img src="/static/kadamay_logo.png" alt="KADAMAY Logo" class="logo-dash">
+                <img src="static/kadamay_logo.png" alt="KADAMAY Logo" class="logo-dash">
                 <h1 id="dashName">...</h1>
                 <p id="dashSerial">...</p>
             </div>
@@ -515,9 +516,13 @@
     </div>
 
     <script>
+        const SUPABASE_URL = 'https://ougkeltvpikpimyqexjc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_el2jm7Ejz4qDJ4igRZ0mJw_jNEpXJdl';
+        const { createClient } = supabase;
+        const _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let currentMemberID = 0;
-        let portalToken = null;
-        let pollInterval = null;
+        let realtimeChannel = null;
         let loginAttempts = 0;
         let loginLockedUntil = 0;
 
@@ -583,19 +588,22 @@
             btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px;"></i>Verifying...';
 
             try {
-                const res = await fetch('/portal/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ serial: input, surname: surnameInput })
-                });
-                const json = await res.json();
+                let { data, error } = await _db
+                    .from('tbl_members')
+                    .select('membersid, surname, name, memserial')
+                    .eq('memserial', input)
+                    .limit(1);
 
-                if (res.ok) {
+                if (error) throw error;
+
+                const matched = data && data.length > 0 &&
+                    data[0].surname.trim().toUpperCase() === surnameInput;
+
+                if (matched) {
                     loginAttempts = 0;
-                    portalToken = json.token;
-                    localStorage.setItem('kadamay_serial', json.member.memserial);
-                    currentMemberID = json.member.membersid;
-                    loadDashboard(json.member);
+                    localStorage.setItem('kadamay_serial', data[0].memserial);
+                    currentMemberID = data[0].membersid;
+                    loadDashboard(data[0]);
                 } else {
                     loginAttempts++;
                     if (loginAttempts >= 5) {
@@ -605,7 +613,7 @@
                         loginLockedUntil = Date.now() + 30 * 1000;
                         errorEl.innerText = 'Too many failed attempts. Locked for 30 seconds.';
                     } else {
-                        errorEl.innerText = json.error || 'Serial ID or surname does not match.';
+                        errorEl.innerText = 'Serial ID or surname does not match.';
                     }
                     errorEl.style.display = 'block';
                     btn.disabled = false;
@@ -621,9 +629,8 @@
 
         function logout() {
             localStorage.removeItem('kadamay_serial');
-            portalToken = null;
+            if (realtimeChannel) _db.removeChannel(realtimeChannel);
             currentMemberID = 0;
-            if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
 
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
@@ -650,15 +657,23 @@
             document.getElementById('dashSerial').innerText = 'ID: ' + member.memserial;
 
             fetchPayments(member.membersid);
-            startPolling(member.membersid);
+            subscribeToRealtime(member.membersid);
         }
 
-        function startPolling(memberId) {
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(async () => {
-                if (!portalToken) return;
-                await fetchPayments(memberId, true);
-            }, 30000); // refresh every 30 seconds
+        function subscribeToRealtime(memberId) {
+            if (realtimeChannel) _db.removeChannel(realtimeChannel);
+
+            realtimeChannel = _db
+                .channel('payment-updates-' + memberId)
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'tbl_contribution', filter: 'membersid=eq.' + memberId },
+                    () => {
+                        document.getElementById('notifBadge').style.display = 'block';
+                        fetchPayments(memberId);
+                    }
+                )
+                .subscribe();
         }
 
         function showFetchError(msg) {
@@ -674,39 +689,59 @@
             document.getElementById('unpaidCases').innerHTML = errorHtml;
         }
 
-        async function fetchPayments(memberId, silent = false) {
+        async function fetchPayments(memberId) {
             const historyList = document.getElementById('paymentHistory');
             const unpaidList = document.getElementById('unpaidCases');
 
-            if (!silent) {
-                const loadingHtml = '<p style="text-align:center; color:#999; padding: 40px;"><i class="fas fa-circle-notch fa-spin"></i> Loading...</p>';
-                historyList.innerHTML = loadingHtml;
-                unpaidList.innerHTML = loadingHtml;
-            }
+            const loadingHtml = '<p style="text-align:center; color:#999; padding: 40px;"><i class="fas fa-circle-notch fa-spin"></i> Loading...</p>';
+            historyList.innerHTML = loadingHtml;
+            unpaidList.innerHTML = loadingHtml;
 
             try {
-                const res = await fetch('/portal/data', {
-                    headers: { 'Authorization': 'Bearer ' + portalToken }
-                });
+                // 1. Member's contributions (Payment History)
+                let allContribRes = await _db
+                    .from('tbl_contribution')
+                    .select('contributionid, dtepaid, receiptno, amount, remarksid, mortuaryid, is_canceled')
+                    .eq('membersid', memberId)
+                    .order('dtepaid', { ascending: false });
 
-                if (res.status === 401) {
-                    // Token expired — force re-login
-                    logout();
-                    return;
+                if (allContribRes.error) throw allContribRes.error;
+                const allPayments = allContribRes.data || [];
+
+                // 2. Remarks lookup
+                const remarksIds = [...new Set(allPayments.map(p => p.remarksid).filter(Boolean))];
+                let remarksMap = {};
+                if (remarksIds.length > 0) {
+                    let remarksRes = await _db
+                        .from('tbl_remarks')
+                        .select('remarksid, remarks')
+                        .in('remarksid', remarksIds);
+                    remarksRes.data?.forEach(r => { remarksMap[r.remarksid] = r.remarks; });
                 }
 
-                if (!res.ok) throw new Error('Server error');
-
-                const json = await res.json();
-                const allPayments  = json.payments       || [];
-                const remarksMap   = json.remarks_map    || {};
-                const deceasedMap  = json.deceased_map   || {};
-                const allCases     = json.mortuary_cases || [];
-
-                // Show notification badge on silent refresh if new payments appeared
-                if (silent) {
-                    document.getElementById('notifBadge').style.display = 'block';
+                // 3. Deceased names for paid contributions
+                const mortuaryIds = [...new Set(allPayments.map(p => p.mortuaryid).filter(Boolean))];
+                let deceasedMap = {};
+                if (mortuaryIds.length > 0) {
+                    let mortRes = await _db
+                        .from('tbl_mortuary')
+                        .select('mortuaryid, tbl_members!deceasedmemberid(surname, name)')
+                        .in('mortuaryid', mortuaryIds);
+                    mortRes.data?.forEach(m => {
+                        const d = m.tbl_members || {};
+                        deceasedMap[m.mortuaryid] = `${d.surname || ''}, ${d.name || ''}`.trim();
+                    });
                 }
+
+                // 4. All mortuary cases — member must pay for every death in the org
+                let mortuaryRes = await _db
+                    .from('tbl_mortuary')
+                    .select('mortuaryid, dtedied, contributionpermember, tbl_members!deceasedmemberid(surname, name)')
+                    .order('dtedied', { ascending: false });
+
+                if (mortuaryRes.error) throw mortuaryRes.error;
+                const allCases = mortuaryRes.data || [];
+
                 // Only non-canceled contributions count as paid (mirrors app.py paid_map logic)
                 const paidMortuaryIds = allPayments
                     .filter(p => p.mortuaryid && !p.is_canceled)
@@ -720,8 +755,8 @@
                         const paidDate = p.dtepaid
                             ? new Date(p.dtepaid).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                             : '—';
-                        const remarks = sanitize(remarksMap[String(p.remarksid)] || 'Payment');
-                        const deceasedName = sanitize(deceasedMap[String(p.mortuaryid)] || '');
+                        const remarks = sanitize(remarksMap[p.remarksid] || 'Payment');
+                        const deceasedName = sanitize(deceasedMap[p.mortuaryid] || '');
                         const fullRemarks = deceasedName ? `${remarks} &mdash; ${deceasedName}` : remarks;
                         const receiptNo = sanitize(p.receiptno || 'N/A');
                         const amount = (p.amount || 0).toLocaleString();
@@ -809,7 +844,7 @@
         }
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js');
+            navigator.serviceWorker.register('static/service-worker.js');
         }
     </script>
 </body>
