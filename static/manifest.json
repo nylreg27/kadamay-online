@@ -2,7 +2,7 @@
     "name": "KADAMAY Member Portal",
     "short_name": "KADAMAY",
     "description": "KADAMAY Member Payment Portal",
-    "start_url": "/",
+    "start_url": ".",
     "display": "standalone",
     "background_color": "#667eea",
     "theme_color": "#008080",
@@ -16,7 +16,8 @@
         {
             "src": "android-chrome-512x512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }
